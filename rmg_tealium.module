@@ -1,0 +1,231 @@
+<?php
+/**
+ * @file
+ * Tealium Tag Cloud module for RMG.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function rmg_tealium_menu() {
+  $items = array();
+
+  $items['admin/config/tealium'] = array(
+    'title' => 'Tealium',
+    'description' => 'Tealium configuration settings.',
+    'access arguments' => array('configure tealium'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('rmg_tealium_admin'),
+    'file' => 'admin/rmg_tealium.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Save Tealium tags in key/value store with Request scope.
+ *
+ * Appends new values to existing keys by default.
+ *
+ * @param string $key
+ *   Tealium tag key. Ex: s.events
+ * @param mixed $value
+ *   String, JSON-encoded string, or array of strings.
+ * @param bool $overwrite
+ *   If TRUE, overwrite existing values with new values.
+ *
+ * @throws Exception
+ *   If $key is not set.
+ */
+function rmg_tealium_set_tag($key, $value, $overwrite = FALSE) {
+  // Tidy up the tag_key.
+  $key = filter_xss(trim($key));
+  if (empty($key)) {
+    watchdog(
+      'rmg_tealium',
+      '@function called with an empty key',
+      array('@function' => __FUNCTION__),
+      'error'
+    );
+    throw new Exception('Key required');
+  }
+
+  // If the string is JSON, decode it.
+  // (This is for modules that set JSON-encoded strings on panels).
+  if (is_string($value)) {
+    $decoded_value = json_decode($value);
+    if (json_last_error() == JSON_ERROR_NONE) {
+      $value = $decoded_value;
+    }
+  }
+
+  // Tidy up the tag value.
+  if (!is_array($value)) {
+    $value = array($value);
+  }
+  $value = array_map('trim', $value);
+  $value = array_map('filter_xss', $value);
+
+  // Save tag(s) to Singleton, so we can pick them up in the theme layer.
+  $manager = TealiumTagManager::getInstance();
+
+  foreach ($value as $v) {
+    $manager->add($key, $v, $overwrite);
+  }
+}
+
+/**
+ * Get the Tealium tags as a JSON string.
+ *
+ * @return string
+ *   Json-encoded array of tags.
+ */
+function rmg_tealium_get_tags() {
+  $tealium_tag_manager = TealiumTagManager::getInstance();
+
+  $values = $tealium_tag_manager->getAll();
+  foreach ($values as $k => $v) {
+    $values[$k] = implode(',', $v);
+  }
+
+  return drupal_json_encode($values);
+}
+
+/**
+ * Implements hook_permission().
+ */
+function rmg_tealium_permission() {
+  return array(
+    'configure tealium' => array(
+      'title' => t('Configure Tealium'),
+      'description' => t("Allows the user to change the Tealium module's configuration."),
+    ),
+  );
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function rmg_tealium_preprocess_page(&$vars) {
+  // If Tealium is disabled, do nothing.
+  if (!variable_get('rmg_tealium_enabled', TRUE)) {
+    return;
+  }
+
+  $account = variable_get('rmg_tealium_account', '');
+  $profile = variable_get('rmg_tealium_profile', '');
+  $env = variable_get('rmg_tealium_environment', '');
+  $sync = variable_get('rmg_tealium_javascript_behaviour', 0);
+
+  // If we don't have Tealium profile settings, don't include the Javascript.
+  if (empty($account) || empty($profile) || empty($env)) {
+    return;
+  }
+
+  // Fire all the hook-defined tags.
+  foreach (module_invoke_all('tealium_tags') as $tag_name => $tag_value) {
+    rmg_tealium_set_tag($tag_name, $tag_value);
+  }
+
+  // Inject tags and Tealium settings into page.
+
+  // Tealium JS Fix (no idea what this is for).
+  drupal_add_js(
+    'if (typeof(window.s) === "undefined") {window.s = new Object;}',
+    'inline'
+  );
+  drupal_add_js('var utag_data = ' . rmg_tealium_get_tags(), 'inline');
+
+  // Custom theme scope overrides header/footer choice, and is attached
+  // in rmg_tealium_preprocess_region().
+  $scope = variable_get('rmg_tealium_javascript_scope_theme', '');
+  if (empty($scope)) {
+    $scope = variable_get('rmg_tealium_javascript_scope', 'footer');
+  }
+
+  $tealium_script = "//tags.tiqcdn.com/utag/{$account}/{$profile}/{$env}/utag.js";
+
+  switch ($sync) {
+    // Asynchronous: load our own script, that loads the external script
+    // on document.ready.
+    case 1:
+      $settings = array(
+        'rmg_tealium' => array('tealium_script' => $tealium_script),
+      );
+      drupal_add_js($settings, 'setting');
+      drupal_add_js(
+        drupal_get_path('module', 'rmg_tealium') . '/theme/js/async.js',
+        array('type' => 'file', 'scope' => $scope)
+      );
+      break;
+
+    // Synchronous, load external script straight into page.
+    case 0:
+    default:
+      drupal_add_js(
+        $tealium_script,
+        array('type' => 'external', 'scope' => $scope)
+      );
+      break;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Add rmg_tealium_record_errors() to the #validate
+ * array of the form.
+ */
+function rmg_tealium_form_alter(&$form, &$form_state, $form_id) {
+  // If Tealium is disabled, do nothing.
+  if (!variable_get('rmg_tealium_enabled', TRUE)) {
+    return;
+  }
+
+  // Add Tealium handler to the form.
+  $form['#validate'][] = 'rmg_tealium_record_errors';
+}
+
+/**
+ * Catch form errors and store them to be sent to Tealium.
+ *
+ * This function is appended to the #validate arrays of all
+ * Drupal forms by rmg_tealium_form_alter().
+ */
+function rmg_tealium_record_errors($form, &$form_state) {
+  $form_errors = form_get_errors();
+  if (empty($form_errors)) {
+    return;
+  }
+
+  $form_errors = array_map('strip_tags', $form_errors);
+  $form_errors = array_map('trim', $form_errors);
+
+  rmg_tealium_set_tag('pageErrorType', 'Field Validation');
+  rmg_tealium_set_tag('pageErrorMessage', $form_errors);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * Attach the Javascript stored in rmg_tealium_preprocess_page()
+ * to the beginning of an arbitrary template region.
+ */
+function rmg_tealium_preprocess_region(&$vars) {
+  // Region names of (header|footer) collide with drupal_add_js()'s
+  // (header|footer) labels.
+  $scope_theme = variable_get('rmg_tealium_javascript_scope_theme', '');
+  if (empty($scope_theme) || $scope_theme == 'footer' || $scope_theme == 'header') {
+    return;
+  }
+
+  // If we're not processing the correct region, we don't need to do anything.
+  if ($vars['region'] != $scope_theme) {
+    return;
+  }
+
+  /* Inject Tealium javascript into page. */
+  $javascript = drupal_get_js($vars['region']);
+
+  $vars['content'] = $javascript . $vars['content'];
+}

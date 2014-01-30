@@ -1,0 +1,6 @@
+name = Tealium Tag Cloud
+description = Tealium Tag Cloud
+package = RMG Tealium
+core = "7.x"
+
+files[] = lib/TealiumTagManager.inc
