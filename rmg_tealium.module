@@ -192,13 +192,11 @@ function rmg_tealium_preprocess_page(&$vars) {
  * array of the form.
  */
 function rmg_tealium_form_alter(&$form, &$form_state, $form_id) {
-  // If Tealium is disabled, do nothing.
-  if (!variable_get('rmg_tealium_enabled', TRUE)) {
-    return;
+  // If Tealium is enabled.
+  if (variable_get('rmg_tealium_enabled', TRUE)) {
+    // Add Tealium handler to the form.
+    $form['#validate'][] = 'rmg_tealium_record_errors';
   }
-
-  // Add Tealium handler to the form.
-  $form['#validate'][] = 'rmg_tealium_record_errors';
 }
 
 /**
@@ -209,15 +207,15 @@ function rmg_tealium_form_alter(&$form, &$form_state, $form_id) {
  */
 function rmg_tealium_record_errors($form, &$form_state) {
   $form_errors = form_get_errors();
-  if (empty($form_errors)) {
-    return;
+
+  if (!empty($form_errors)) {
+    $form_errors = array_map('strip_tags', $form_errors);
+    $form_errors = array_map('trim', $form_errors);
+
+    rmg_tealium_set_tag('pageErrorType', 'Field Validation');
+    rmg_tealium_set_tag('pageErrorMessage', $form_errors);
   }
 
-  $form_errors = array_map('strip_tags', $form_errors);
-  $form_errors = array_map('trim', $form_errors);
-
-  rmg_tealium_set_tag('pageErrorType', 'Field Validation');
-  rmg_tealium_set_tag('pageErrorMessage', $form_errors);
 }
 
 /**
@@ -230,17 +228,26 @@ function rmg_tealium_preprocess_region(&$vars) {
   // Region names of (header|footer) collide with drupal_add_js()'s
   // (header|footer) labels.
   $scope_theme = variable_get('rmg_tealium_javascript_scope_theme', '');
-  if (empty($scope_theme) || $scope_theme == 'footer' || $scope_theme == 'header') {
-    return;
+  if (!empty($scope_theme) && $scope_theme && 'footer' && $scope_theme != 'header'
+    && $vars['region'] == $scope_theme) {
+
+    // Inject Tealium javascript into page.
+    $javascript = drupal_get_js($vars['region']);
+    $vars['content'] = $javascript . $vars['content'];
   }
 
-  // If we're not processing the correct region, we don't need to do anything.
-  if ($vars['region'] != $scope_theme) {
-    return;
-  }
+}
 
-  /* Inject Tealium javascript into page. */
-  $javascript = drupal_get_js($vars['region']);
 
-  $vars['content'] = $javascript . $vars['content'];
+/**
+ * Catch form errors and store them to be sent to Tealium.
+ *
+ * This function is appended to the #validate arrays of all
+ * Drupal forms by rmg_tealium_form_alter().
+ */
+function rmg_tealium_google_cse_num_results_alter($total) {
+
+  // Notify Tealium about the new tag.
+  rmg_tealium_set_tag('siteSearchResults', $total);
+
 }
