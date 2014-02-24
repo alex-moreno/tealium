@@ -4,6 +4,9 @@
  * Tealium Tag Cloud module for RMG.
  */
 
+// A global require because the helper function will be sued site wide.
+module_load_include('inc', 'rmg_tealium', '/helpers/rmg_tealium');
+
 /**
  * Implements hook_menu().
  */
@@ -45,7 +48,7 @@ function rmg_tealium_set_tag($key, $value, $overwrite = FALSE) {
       'rmg_tealium',
       '@function called with an empty key',
       array('@function' => __FUNCTION__),
-      'error'
+      WATCHDOG_ERROR
     );
     throw new Exception('Key required');
   }
@@ -238,7 +241,6 @@ function rmg_tealium_preprocess_region(&$vars) {
 
 }
 
-
 /**
  * Catch form errors and store them to be sent to Tealium.
  *
@@ -248,6 +250,15 @@ function rmg_tealium_preprocess_region(&$vars) {
 function rmg_tealium_google_cse_num_results_alter($total) {
 
   // Notify Tealium about the new tag.
-  rmg_tealium_set_tag('siteSearchResults', $total);
+    rmg_tealium_set_tag('siteSearchResults', $total);
 
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function rmg_tealium_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'page_manager' || $module == 'panels' || $module == 'ctools') {
+    return "plugins/$plugin";
+  }
 }
