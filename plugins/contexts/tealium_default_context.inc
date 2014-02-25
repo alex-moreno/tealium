@@ -70,9 +70,6 @@ function tealium_default_context_settings_form_submit($form, &$form_state) {
   // This will either be the value set previously or a value set by the
   // validator.
   $form_state['conf'][TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME] = $form_state['values'][TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME];
-
-  watchdog("track_and_trace", '<pre>' . print_r( $conf, true) . '</pre>');
-
 }
 
 
@@ -113,35 +110,40 @@ function ctools_context_tealium_default_convert_list() {
   // Include tokens provided by rml_feetopay module.
   if (module_exists('token')) {
     if ($token_substitution_class = tealium_default_context_get_setting(TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME)) {
-      foreach (token_get_list($token_substitution_class) as $tokens) {
-        $list += $tokens;
-      }
+
+      // Now we need to loop over all the tokens, fetching their substitutions.
+//      foreach (token_get_list($token_substitution_class) as $tokens) {
+      print_r($token_substitution_class);
+//      foreach ($token_substitution_class as $tokens) {
+//        $list += $tokens;
+//      }
     }
   }
+  return $token_substitution_class;
 
-  return $list;
+//  return array(
+//    'app_step' => t('Application step'),
+//  );
 }
 
 /**
  * Convert a context into a string to be used as a keyword by content types,etc.
+ * Executed when page is rendered.
  */
 function ctools_context_tealium_default_convert($context, $type) {
-  // Check if token.module can provide the replacement.
-  if (
-    module_exists('token') &&
-    isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
-    !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})
-  ) {
-    $token_values = token_get_values($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME});
-    $key = array_search($type, $token_values->tokens, TRUE);
+  $token_replaced = '';
 
-    // Return the Key value if exist.
-    if ($key !== FALSE) {
-      $token_value = $token_values->values[$key];
-      $token_value = (!empty($token_value) && is_array($token_value)) ? json_encode($token_value) : $token_value;
-      return $token_value;
-    }
+  if (module_exists('token') && isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
+    !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})) {
+    // We build the tokenized text.
+    $txt_to_replace = '[' . $context->keyword
+      . ':' . $context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME} . ']';
+
+    // And we search for candidates.
+    $token_replaced = token_replace($txt_to_replace);
   }
+
+  return $token_replaced;
 }
 
 /**
@@ -158,56 +160,59 @@ function ctools_context_tealium_default_convert($context, $type) {
  */
 function tealium_default_context_get_setting($context_form_setting_key) {
   $path_fragments = explode('/', $_GET['q']);
-  if (empty($path_fragments)) {
-    return FALSE;
-  }
+  $token_list = FALSE;
 
   // Try and find the page context handler name from the path.
   $page_cache = page_manager_cache_load('page');
 
-  // @todo This is bit dirty, but can't see a better way.
-  // @see route_get_current_page_subtask_name()
-  if (!empty($page_cache) && !empty($page_cache->handlers)) {
-    foreach ($page_cache->handlers as $handler) {
-      foreach ($path_fragments as $path_fragment) {
-        if ($path_fragment == $handler->name && !empty($handler->conf['contexts'])) {
-          foreach ($handler->conf['contexts'] as $context) {
-            if (!empty($context['context_settings'][$context_form_setting_key])) {
-              return $context['context_settings'][$context_form_setting_key];
+  if(!empty($path_fragments)) {
+    // @todo This is bit dirty, but can't see a better way.
+    // @see route_get_current_page_subtask_name()
+    if (!empty($page_cache) && !empty($page_cache->handlers)) {
+      foreach ($page_cache->handlers as $handler) {
+        foreach ($path_fragments as $path_fragment) {
+          // Does this make sense instead of using directly handler->name?
+          if ($path_fragment == $handler->name && !empty($handler->conf['contexts'])) {
+            foreach ($handler->conf['contexts'] as $context) {
+              if (!empty($context[$context_form_setting_key])) {
+                $tokens[$context['keyword']] = $context[$context_form_setting_key];
+              }
             }
           }
         }
       }
+      $token_list = $tokens;
     }
-  }
 
-  // We haven't found the handler yet, so we try to find it in the
-  // page manager default handlers.
-  // @todo page_manager_page_load_all() return all the pages with the current
-  // page on the top of the array. Investigate this further. If this is the
-  // case we can use this to implement  a nice and easy fallback mechanism if
-  // the plugin handler is not present for some reason.
-  $pages = page_manager_page_load_all();
-  if (empty($pages)) {
-    return FALSE;
-  }
+    // We haven't found the handler yet, so we try to find it in the
+    // page manager default handlers.
+    // @todo page_manager_page_load_all() return all the pages with the current
+    // page on the top of the array. Investigate this further. If this is the
+    // case we can use this to implement  a nice and easy fallback mechanism if
+    // the plugin handler is not present for some reason.
+    $pages = page_manager_page_load_all();
+    if (empty($pages)) {
+      return FALSE;
+    }
 
-  foreach ($pages as $page) {
-    if (!empty($page->default_handlers)) {
-      foreach ($page->default_handlers as $handler) {
-        foreach ($path_fragments as $path_fragment) {
-          if ($path_fragment == $handler->name && !empty($handler->conf['contexts'])) {
-            foreach ($handler->conf['contexts'] as $context) {
-              if (!empty($context['context_settings'][$context_form_setting_key])) {
-                return $context['context_settings'][$context_form_setting_key];
+    foreach ($pages as $page) {
+      if (!empty($page->default_handlers)) {
+        foreach ($page->default_handlers as $handler) {
+          foreach ($path_fragments as $path_fragment) {
+            if ($path_fragment == $handler->name && !empty($handler->conf['contexts'])) {
+              foreach ($handler->conf['contexts'] as $context) {
+                if (!empty($context['context_settings'][$context_form_setting_key])) {
+                  return $context['context_settings'][$context_form_setting_key];
+                }
               }
             }
           }
         }
       }
     }
+
   }
 
   // All attempts to find the handler and the default context settings failed.
-  return FALSE;
+  return $token_list;
 }
