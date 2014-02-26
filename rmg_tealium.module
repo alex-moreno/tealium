@@ -108,11 +108,12 @@ function rmg_tealium_permission() {
 
 
 /**
- * Encapsulate here all the "Tealium enabled" related stuff and return the js if so.
+ * Encapsulate here all the "Tealium enabled" related stuff and return the js.
  *
  * @return string
+ *   Return the library url.
  */
-function rmg_tealium_build_utag_js(){
+function rmg_tealium_build_utag_js() {
   // Default return value.
   $js_lib = "";
   // Tealium Variables.
@@ -124,7 +125,7 @@ function rmg_tealium_build_utag_js(){
   $tealium_script = "//tags.tiqcdn.com/utag/$account/$profile/$env/utag.js";
 
   // If we don't have Tealium profile settings or it is not enabled, do nothing.
-  if(!empty($account) || !empty($profile) || !empty($env) && $tealium_enabled){
+  if (!empty($account) || !empty($profile) || !empty($env) && $tealium_enabled) {
     // Tags url to cdn.
     $js_lib = "//tags.tiqcdn.com/utag/$account/$profile/$env/utag.js";
   }
@@ -166,8 +167,9 @@ function rmg_tealium_preprocess_page(&$vars) {
       // on document.ready.
       case 1:
         $settings = array(
-          'rmg_tealium' => array('tealium_script'
-          => $tealium_script, array('type' => 'inline', 'scope' => 'footer')),
+          'rmg_tealium' => array(
+            'tealium_script' => $tealium_script,
+            array('type' => 'inline', 'scope' => 'footer')),
         );
         drupal_add_js($settings, 'setting', array('scope' => $scope));
         drupal_add_js(
@@ -248,10 +250,8 @@ function rmg_tealium_preprocess_region(&$vars) {
  * Drupal forms by rmg_tealium_form_alter().
  */
 function rmg_tealium_google_cse_num_results_alter($total) {
-
   // Notify Tealium about the new tag.
-    rmg_tealium_set_tag('siteSearchResults', $total);
-
+  rmg_tealium_set_tag('siteSearchResults', $total);
 }
 
 /**

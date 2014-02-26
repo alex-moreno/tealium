@@ -24,14 +24,7 @@ $plugin = array(
 );
 
 /**
- * Form to set the Context based settings for Tealium Default context.
- *
- * @param array $conf
- *   The conf array for the context.
- *
- *
- * @return array
- *   Form array.
+ * Implements hook_block_form().
  */
 function tealium_default_context_settings_form($form, &$form_state) {
   $conf = $form_state['conf'];
@@ -74,7 +67,7 @@ function tealium_default_context_settings_form_submit($form, &$form_state) {
 
 
 /**
- * Create a context, either from manual configuration or from an argument on the URL.
+ * Create a context from manual configuration or from an argument on the URL.
  *
  * @param bool $empty
  *   Context empty of not.
@@ -113,7 +106,7 @@ function ctools_context_tealium_default_convert_list() {
     if ($token_substitution_class = tealium_default_context_get_setting(TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME)) {
       $tokens = pfw_tealium_token_info();
       $tealium_tokens = $tokens['tokens'][PFW_TEALIUM_TOKEN_TYPE];
-      foreach ($tealium_tokens as $index=>$token) {
+      foreach ($tealium_tokens as $index => $token) {
         $list[$index] = $index;
       }
     }
@@ -126,6 +119,7 @@ function ctools_context_tealium_default_convert_list() {
 
 /**
  * Convert a context into a string to be used as a keyword by content types,etc.
+ *
  * Executed when page is rendered.
  */
 function ctools_context_tealium_default_convert($context, $type) {
@@ -167,7 +161,7 @@ function tealium_default_context_get_setting($context_form_setting_key) {
   // Try and find the page context handler name from the path.
   $page_cache = page_manager_cache_load('page');
 
-  if(!empty($path_fragments)) {
+  if (!empty($path_fragments)) {
     // @todo This is bit dirty, but can't see a better way.
     // @see route_get_current_page_subtask_name()
     if (!empty($page_cache) && !empty($page_cache->handlers)) {
@@ -193,7 +187,7 @@ function tealium_default_context_get_setting($context_form_setting_key) {
     // case we can use this to implement  a nice and easy fallback mechanism if
     // the plugin handler is not present for some reason.
     $pages = page_manager_page_load_all();
-    if(!empty($pages)){
+    if (!empty($pages)) {
       foreach ($pages as $page) {
         if (!empty($page->default_handlers)) {
           foreach ($page->default_handlers as $handler) {

@@ -67,7 +67,7 @@ function tealium_default_content_type_render_content_type_edit_form($form, &$for
 }
 
 /**
- * Form submission handler for tealium_default_content_type_render_content_type_edit_form().
+ * Form submission handler for tealium_default_c_t_render_c_t_edit_form().
  */
 function tealium_default_content_type_render_content_type_edit_form_submit(&$form, &$form_state) {
   // Get data points.
