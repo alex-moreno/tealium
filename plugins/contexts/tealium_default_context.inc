@@ -46,7 +46,7 @@ function tealium_default_context_settings_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Substitution token class'),
     '#size' => 50,
-    '#description' => t('The name of the substitution token class to be used to pull out the exposed tokens in the journey (first param of token_get_values).'),
+    '#description' => t('The name of the substitution token class to be used to pull out the exposed tokens in the journey (first param of token_replace).'),
     '#default_value' => isset($conf[TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME]) ? $conf[TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME] : 'test',
   );
 
@@ -106,24 +106,22 @@ function ctools_context_create_tealium_default_context($empty, $data = NULL, $co
  */
 function ctools_context_tealium_default_convert_list() {
   $list = array();
+  $token_substitution_class = NULL;
 
   // Include tokens provided by rml_feetopay module.
   if (module_exists('token')) {
     if ($token_substitution_class = tealium_default_context_get_setting(TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME)) {
-
-      // Now we need to loop over all the tokens, fetching their substitutions.
-//      foreach (token_get_list($token_substitution_class) as $tokens) {
-      print_r($token_substitution_class);
-//      foreach ($token_substitution_class as $tokens) {
-//        $list += $tokens;
-//      }
+      $tokens = pfw_tealium_token_info();
+      $tealium_tokens = $tokens['tokens'][TEALIUM_TOKEN_TYPE];
+      foreach ($tealium_tokens as $index=>$token) {
+        $list[$index] = $index;
+      }
     }
-  }
-  return $token_substitution_class;
 
-//  return array(
-//    'app_step' => t('Application step'),
-//  );
+    return $list;
+  }
+
+  return $token_substitution_class;
 }
 
 /**
@@ -131,19 +129,23 @@ function ctools_context_tealium_default_convert_list() {
  * Executed when page is rendered.
  */
 function ctools_context_tealium_default_convert($context, $type) {
-  $token_replaced = '';
+  $text_to_return = NULL;
 
   if (module_exists('token') && isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
     !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})) {
-    // We build the tokenized text.
-    $txt_to_replace = '[' . $context->keyword
+    // We build the tokenized text, ie: [tealium_tokens:tealium_appstep].
+    $txt_to_replace = '[' . TEALIUM_TOKEN_TYPE
       . ':' . $context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME} . ']';
 
     // And we search for candidates.
-    $token_replaced = token_replace($txt_to_replace);
+    $text_to_return = token_replace($txt_to_replace);
+  }
+  else {
+    // No token, display field "as is".
+    $text_to_return = $context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME};
   }
 
-  return $token_replaced;
+  return $text_to_return;
 }
 
 /**
@@ -191,23 +193,23 @@ function tealium_default_context_get_setting($context_form_setting_key) {
     // case we can use this to implement  a nice and easy fallback mechanism if
     // the plugin handler is not present for some reason.
     $pages = page_manager_page_load_all();
-    if (empty($pages)) {
-      return FALSE;
-    }
-
-    foreach ($pages as $page) {
-      if (!empty($page->default_handlers)) {
-        foreach ($page->default_handlers as $handler) {
-          foreach ($path_fragments as $path_fragment) {
-            if ($path_fragment == $handler->name && !empty($handler->conf['contexts'])) {
-              foreach ($handler->conf['contexts'] as $context) {
-                if (!empty($context['context_settings'][$context_form_setting_key])) {
-                  return $context['context_settings'][$context_form_setting_key];
+    if(!empty($pages)){
+      foreach ($pages as $page) {
+        if (!empty($page->default_handlers)) {
+          foreach ($page->default_handlers as $handler) {
+            foreach ($path_fragments as $path_fragment) {
+              if ($path_fragment == $handler->name && !empty($handler->conf['contexts'])) {
+                foreach ($handler->conf['contexts'] as $context) {
+                  if (!empty($context['context_settings'][$context_form_setting_key])) {
+                    $tokens[$context['keyword']] = $context[$context_form_setting_key];
+                    return $context['context_settings'][$context_form_setting_key];
+                  }
                 }
               }
             }
           }
         }
+        $token_list = $tokens;
       }
     }
 
