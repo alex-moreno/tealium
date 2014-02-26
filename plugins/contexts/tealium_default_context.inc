@@ -112,7 +112,7 @@ function ctools_context_tealium_default_convert_list() {
   if (module_exists('token')) {
     if ($token_substitution_class = tealium_default_context_get_setting(TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME)) {
       $tokens = pfw_tealium_token_info();
-      $tealium_tokens = $tokens['tokens'][TEALIUM_TOKEN_TYPE];
+      $tealium_tokens = $tokens['tokens'][PFW_TEALIUM_TOKEN_TYPE];
       foreach ($tealium_tokens as $index=>$token) {
         $list[$index] = $index;
       }
@@ -134,7 +134,7 @@ function ctools_context_tealium_default_convert($context, $type) {
   if (module_exists('token') && isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
     !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})) {
     // We build the tokenized text, ie: [tealium_tokens:tealium_appstep].
-    $txt_to_replace = '[' . TEALIUM_TOKEN_TYPE
+    $txt_to_replace = '[' . PFW_TEALIUM_TOKEN_TYPE
       . ':' . $context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME} . ']';
 
     // And we search for candidates.
