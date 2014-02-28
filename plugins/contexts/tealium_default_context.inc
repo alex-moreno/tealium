@@ -114,8 +114,6 @@ function ctools_context_tealium_default_convert_list() {
  */
 function ctools_context_tealium_default_convert($context, $type) {
   $text_to_return = NULL;
-  dpm('context ');
-  dpm($context);
 
   if (module_exists('token') && isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
     !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})) {
