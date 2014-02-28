@@ -40,7 +40,7 @@ function tealium_default_context_settings_form($form, &$form_state) {
     '#title' => t('Substitution token class'),
     '#size' => 50,
     '#description' => t('The name of the substitution token class to be used to pull out the exposed tokens in the journey (first param of token_replace).'),
-    '#default_value' => isset($conf[TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME]) ? $conf[TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME] : 'test',
+    '#default_value' => isset($conf[TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME]) ? $conf[TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME] : '',
   );
 
   return $form;
@@ -97,7 +97,7 @@ function ctools_context_tealium_default_convert_list() {
       // We fetch the list of tokens
       $tokens = rmg_tealium_token_info();
       $tealium_tokens = $tokens['tokens'];
-      foreach ($tealium_tokens as $index => $token) {
+      foreach ($tealium_tokens['tealium_tokens'] as $index => $token) {
         $list[$index] = $index;
       }
     }
@@ -114,6 +114,8 @@ function ctools_context_tealium_default_convert_list() {
  */
 function ctools_context_tealium_default_convert($context, $type) {
   $text_to_return = NULL;
+  dpm('context ');
+  dpm($context);
 
   if (module_exists('token') && isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
     !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})) {
