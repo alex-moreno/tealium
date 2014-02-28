@@ -117,11 +117,9 @@ function ctools_context_tealium_default_convert($context, $type) {
 
   if (module_exists('token') && isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
     !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})) {
-
     // List of tokens and return them in as array.
     $list_of_tokens = rmg_tealium_token_info();
-
-    $key = $list_of_tokens['tokens'][$type];
+    $key = $list_of_tokens['tokens'][$context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}];
 
     if (!empty($key)) {
       // We build the tokenized text, ie: [tealium_tokens:tealium_appstep].

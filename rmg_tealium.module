@@ -296,7 +296,9 @@ function rmg_tealium_token_info() {
 
   return array(
     'types' => $types,
-    'tokens' => $tealium_tokens,
+    'tokens' => array(
+      RMG_TEALIUM_TOKEN_TYPE => $tealium_tokens,
+    ),
   );
 }
 
@@ -307,8 +309,8 @@ function rmg_tealium_tokens($type, $tokens, array $data = array(), array $option
   global $user;
 
   $replacements = array();
-  if ($type == RMG_TEALIUM_TOKEN_TYPE) {
 
+  if ($type == RMG_TEALIUM_TOKEN_TYPE and !empty($tokens)) {
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'tealium_pagename':
