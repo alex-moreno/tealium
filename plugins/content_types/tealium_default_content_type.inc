@@ -28,13 +28,12 @@ $plugin = array(
 function tealium_default_content_type_render($subtype, $conf, $args, $context) {
   $block = new stdClass();
   $default_data_points = _rmg_tealium_get_default_data_points_from_context();
-  // Add the data points to the conf.
-  $conf = array_replace($conf, $default_data_points);
 
   if (!empty($conf)) {
     foreach ($conf as $key => $value) {
       $value = ctools_context_keyword_substitute($value, array(), $context);
       if (!empty($value) && in_array($key, $default_data_points)) {
+        // Time to send the valug to Tealium.
         rmg_tealium_tag_notify($key, $value);
       }
     }
@@ -108,22 +107,5 @@ function _rmg_tealium_get_default_data_points() {
     'pageName' => t('Custom page name if you need to override the one set site wide.'),
     'pageApplicationName' => t('pageApplicationName Tealium Data point'),
     'pageApplicationStep' => t('pageApplicationStep Tealium Data point'),
-    'productName' => t('productName Tealium Data point'),
-    'productCategory' => t('productCategory Tealium Data point'),
-    'productSubcategory' => t('productSubcategory Tealium Data point'),
-    'productPrice' => t('productPrice Tealium Data point'),
-    'productQuantity' => t('productQuantity Tealium Data point'),
-    'productAttributes' => t('productAttributes Tealium Data point'),
-    'pageTemplate' => t('pageTemplate Tealium Data point'),
-    'transactionID' => t('transactionID Tealium Data point'),
-    'transactionTotal' => t('transactionTotal Tealium Data point'),
-    'transactionPaymentType' => t('transactionPaymentType Tealium Data point'),
-    'transactionCurrency' => t('transactionCurrency Tealium Data point'),
-    'conversionType' => t('Ex: Redelivery'),
-    'conversionID' => t('Ex: CLEO Reference Number'),
-    'conversionProduct' => t('Conversion product name. Ex: Redelivery'),
-    'conversionAttributes' => t('An array of conversion attributes as key value pairs.'),
-    'pageErrorType' => t('Type of the error message. Ex: Payment validation. Do not use this to set Form Validation Errors'),
-    'pageErrorMessage' => t('Error message. Ex: Payment failed. Do not use this to set Form Validation Errors'),
   );
 }

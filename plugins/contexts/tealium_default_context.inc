@@ -47,15 +47,6 @@ function tealium_default_context_settings_form($form, &$form_state) {
 }
 
 /**
- * Implements hook_form_validate().
- */
-function tealium_default_context_settings_form_validate($form, &$form_state) {
-  if ($form_state['values'][TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME]) {
-
-  }
-}
-
-/**
  * Implements hook_form_submit().
  */
 function tealium_default_context_settings_form_submit($form, &$form_state) {
@@ -64,7 +55,6 @@ function tealium_default_context_settings_form_submit($form, &$form_state) {
   // validator.
   $form_state['conf'][TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME] = $form_state['values'][TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME];
 }
-
 
 /**
  * Create a context from manual configuration or from an argument on the URL.
@@ -104,17 +94,17 @@ function ctools_context_tealium_default_convert_list() {
   // Include tokens provided by rml_feetopay module.
   if (module_exists('token')) {
     if ($token_substitution_class = tealium_default_context_get_setting(TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME)) {
-      $tokens = pfw_tealium_token_info();
-      $tealium_tokens = $tokens['tokens'][PFW_TEALIUM_TOKEN_TYPE];
+      // We fetch the list of tokens
+      $tokens = rmg_tealium_token_info();
+      $tealium_tokens = $tokens['tokens'];
       foreach ($tealium_tokens as $index => $token) {
         $list[$index] = $index;
       }
     }
-
-    return $list;
   }
 
-  return $token_substitution_class;
+//  return $token_substitution_class;
+  return $list;
 }
 
 /**
@@ -127,19 +117,24 @@ function ctools_context_tealium_default_convert($context, $type) {
 
   if (module_exists('token') && isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
     !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})) {
-    // We build the tokenized text, ie: [tealium_tokens:tealium_appstep].
-    $txt_to_replace = '[' . PFW_TEALIUM_TOKEN_TYPE
-      . ':' . $context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME} . ']';
 
-    // And we search for candidates.
-    $text_to_return = token_replace($txt_to_replace);
-  }
-  else {
-    // No token, display field "as is".
-    $text_to_return = $context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME};
-  }
+    // List of tokens and return them in as array.
+    $list_of_tokens = rmg_tealium_token_info();
 
-  return $text_to_return;
+    $key = $list_of_tokens['tokens'][$type];
+
+    if (!empty($key)) {
+      // We build the tokenized text, ie: [tealium_tokens:tealium_appstep].
+      $txt_to_replace = '[' . $context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}
+        . ':' . $type . ']';
+
+      // And we search for candidates.
+      $text_to_return = token_replace($txt_to_replace);
+
+      return $text_to_return;
+    }
+
+  }
 }
 
 /**
@@ -172,6 +167,7 @@ function tealium_default_context_get_setting($context_form_setting_key) {
             foreach ($handler->conf['contexts'] as $context) {
               if (!empty($context[$context_form_setting_key])) {
                 $tokens[$context['keyword']] = $context[$context_form_setting_key];
+
               }
             }
           }

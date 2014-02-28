@@ -4,6 +4,8 @@
  * Tealium Tag Cloud module for RMG.
  */
 
+define('RMG_TEALIUM_TOKEN_TYPE', 'tealium_tokens');
+
 // A global require because the helper function will be sued site wide.
 module_load_include('inc', 'rmg_tealium', '/helpers/rmg_tealium');
 
@@ -125,7 +127,7 @@ function rmg_tealium_build_utag_js() {
   $tealium_script = "//tags.tiqcdn.com/utag/$account/$profile/$env/utag.js";
 
   // If we don't have Tealium profile settings or it is not enabled, do nothing.
-  if (!empty($account) || !empty($profile) || !empty($env) && $tealium_enabled) {
+  if ($tealium_enabled && !empty($account) || !empty($profile) || !empty($env)) {
     // Tags url to cdn.
     $js_lib = "//tags.tiqcdn.com/utag/$account/$profile/$env/utag.js";
   }
@@ -137,7 +139,7 @@ function rmg_tealium_build_utag_js() {
  * Implements hook_preprocess_page().
  */
 function rmg_tealium_preprocess_page(&$vars) {
-  $sync = variable_get('rmg_tealium_javascript_behaviour', 0);
+  $sync = variable_get('rmg_tealium_javascript_async_mode', 0);
 
   // In rmg_tealium_preprocess_region().
   $scope = variable_get('rmg_tealium_javascript_scope_theme', '');
@@ -261,4 +263,106 @@ function rmg_tealium_ctools_plugin_directory($module, $plugin) {
   if ($module == 'page_manager' || $module == 'panels' || $module == 'ctools') {
     return "plugins/$plugin";
   }
+}
+
+
+/**
+ * Implements hook_token_info().
+ */
+function rmg_tealium_token_info() {
+
+  $types[RMG_TEALIUM_TOKEN_TYPE] = array(
+    'name' => t("Tealium Tokens"),
+    'description' => t("Tokens for Tealium."),
+  );
+
+  // Tealium specific tokens.
+  $tealium_tokens['tealium_pagename'] = array(
+    'name' => t("Tealium Page Name"),
+    'description' => t("The current page name of the App."),
+  );
+
+  // Tealium specific tokens.
+  $tealium_tokens['tealium_page_app_name'] = array(
+    'name' => t("Tealium Page Name"),
+    'description' => t("The current page Application Name of the App."),
+  );
+
+  // Tealium specific tokens.
+  $tealium_tokens['tealium_app_step'] = array(
+    'name' => t("Tealium App Step"),
+    'description' => t("The current {app}.step of the App."),
+  );
+
+  return array(
+    'types' => $types,
+    'tokens' => $tealium_tokens,
+  );
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function rmg_tealium_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  global $user;
+
+  $replacements = array();
+  if ($type == RMG_TEALIUM_TOKEN_TYPE) {
+
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'tealium_pagename':
+          // Initial token, empty by default.
+          $replacements[$original] = rmg_tealium_token('tealium_pagename');
+          break;
+
+        case 'tealium_page_app_name':
+          // Initial token, empty by default.
+          $replacements[$original] = rmg_tealium_token('tealium_page_app_name');
+          break;
+
+        case 'tealium_app_step':
+          // Initial token, empty by default.
+          $replacements[$original] = rmg_tealium_token('tealium_app_step');
+          break;
+
+      }
+    }
+  }
+
+  return $replacements;
+}
+
+/**
+ * Helper function to get and set tokens on content plugins.
+ *
+ * @param string $token_key
+ *   Token Key.
+ * @param string|bool $token_value
+ *   Token Value (optional).
+ *
+ * @return string
+ *   Return the token value of the given token.
+ */
+function rmg_tealium_token($token_key, $token_value = FALSE) {
+  // Define static token array so we can collect token value per request.
+  static $pfw_tokens = array();
+
+  if ($token_value) {
+    if (empty($token_key) == FALSE) {
+      // Just store the token in the static array.
+      $pfw_tokens[$token_key] = $token_value;
+    }
+  }
+  else {
+    if (empty($token_key) == FALSE && isset($pfw_tokens[$token_key])) {
+      return $pfw_tokens[$token_key];
+    }
+    else {
+      return '';
+    }
+  }
+
+  // Return all the array (list of tokens functionality).
+  return $pfw_tokens;
 }

@@ -52,7 +52,7 @@ function rmg_tealium_admin() {
 
   // Formatted as radios because there are other ways to attach JS that may be
   // supported in the future (eg async attribute).
-  $form['javascript']['rmg_tealium_javascript_behaviour'] = array(
+  $form['javascript']['rmg_tealium_javascript_async_mode'] = array(
     '#type' => 'radios',
     '#title' => t('Attachment behaviour'),
     '#default_value' => variable_get('rmg_tealium_javascript_behaviour', 0),
