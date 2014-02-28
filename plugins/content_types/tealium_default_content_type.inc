@@ -34,7 +34,6 @@ function tealium_default_content_type_render($subtype, $conf, $args, $context) {
       $value = ctools_context_keyword_substitute($value, array(), $context);
       if (!empty($value) && in_array($key, $default_data_points)) {
         // Time to send the valug to Tealium.
-
         rmg_tealium_tag_notify($key, $value);
       }
     }
