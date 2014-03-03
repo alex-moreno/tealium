@@ -149,7 +149,7 @@ function rmg_tealium_preprocess_page(&$vars) {
 
   $tealium_script = rmg_tealium_build_utag_js();
   // If tealium is enabled.
-  if ($tealium_script != "") {
+  if ($tealium_script != '') {
     // Fire all the hook-defined tags.
     foreach (module_invoke_all('tealium_tags') as $tag_name => $tag_value) {
       rmg_tealium_set_tag($tag_name, $tag_value);

@@ -94,7 +94,7 @@ function ctools_context_tealium_default_convert_list() {
   // Include tokens provided by rml_feetopay module.
   if (module_exists('token')) {
     if ($token_substitution_class = tealium_default_context_get_setting(TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME)) {
-      // We fetch the list of tokens
+      // We fetch the list of tokens.
       $tokens = rmg_tealium_token_info();
       $tealium_tokens = $tokens['tokens'];
       foreach ($tealium_tokens['tealium_tokens'] as $index => $token) {
@@ -103,7 +103,6 @@ function ctools_context_tealium_default_convert_list() {
     }
   }
 
-//  return $token_substitution_class;
   return $list;
 }
 
@@ -124,7 +123,7 @@ function ctools_context_tealium_default_convert($context, $type) {
     if (!empty($key)) {
       // We build the tokenized text, ie: [tealium_tokens:tealium_appstep].
       $txt_to_replace = '[' . $context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}
-        . ':' . $type . ']';
+      . ':' . $type . ']';
 
       // And we search for candidates.
       $text_to_return = token_replace($txt_to_replace);

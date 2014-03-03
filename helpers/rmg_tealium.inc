@@ -17,6 +17,7 @@
  *   Merge Value if exist.
  *
  * @param bool $is_session_based
+ *   Is it session based?
  *
  *   Set a flag so that will be returned on the tag cloud through out the
  *   session. Default will be boolean FALSE and the tag will return only on a
@@ -29,7 +30,12 @@ function rmg_tealium_tag_notify($tealium_tag_key, $tealium_tag_value, $merge = F
   }
 
   if (isset($tealium_tag_key) && isset($tealium_tag_value) && !empty($tealium_tag_key) && !empty($tealium_tag_value)) {
-    rmg_tealium_set_tag($tealium_tag_key, $tealium_tag_value);
+    try {
+      rmg_tealium_set_tag($tealium_tag_key, $tealium_tag_value);
+    }
+    catch (Exception $message) {
+      drupal_set_message(check_plain($message), 'error');
+    }
   }
 }
 

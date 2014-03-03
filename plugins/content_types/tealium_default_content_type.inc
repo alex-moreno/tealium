@@ -55,7 +55,7 @@ function tealium_default_content_type_render_content_type_edit_form($form, &$for
     foreach ($default_data_points as $default_data_point) {
       $form[$default_data_point] = array(
         '#type' => 'textfield',
-        '#title' => t($default_data_point),
+        '#title' => check_plain($default_data_point),
         '#default_value' => isset($conf[$default_data_point]) ? $conf[$default_data_point] : '',
         '#description' => t('Tealium @data_point.', array('@data_point' => $default_data_point)),
       );
