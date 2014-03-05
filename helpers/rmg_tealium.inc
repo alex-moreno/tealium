@@ -33,8 +33,8 @@ function rmg_tealium_tag_notify($tealium_tag_key, $tealium_tag_value, $merge = F
     try {
       rmg_tealium_set_tag($tealium_tag_key, $tealium_tag_value);
     }
-    catch (Exception $message) {
-      drupal_set_message(check_plain($message), 'error');
+    catch (Exception $e) {
+      watchdog('bing_maps_api', $e->getMessage(), array(), WATCHDOG_ERROR);
     }
   }
 }
