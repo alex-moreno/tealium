@@ -5,6 +5,7 @@
  */
 
 define('RMG_TEALIUM_TOKEN_TYPE', 'tealium_tokens');
+define('RMG_TEALIUM_JS_LIB', '//tags.tiqcdn.com/utag/$account/$profile/$env/utag.js');
 
 // A global require because the helper function will be sued site wide.
 module_load_include('inc', 'rmg_tealium', '/helpers/rmg_tealium');
@@ -129,7 +130,7 @@ function rmg_tealium_build_utag_js() {
   // If we don't have Tealium profile settings or it is not enabled, do nothing.
   if ($tealium_enabled && !empty($account) || !empty($profile) || !empty($env)) {
     // Tags url to cdn.
-    $js_lib = "//tags.tiqcdn.com/utag/$account/$profile/$env/utag.js";
+    $js_lib = RMG_TEALIUM_JS_LIB;
   }
 
   return $js_lib;
@@ -152,7 +153,12 @@ function rmg_tealium_preprocess_page(&$vars) {
   if ($tealium_script != '') {
     // Fire all the hook-defined tags.
     foreach (module_invoke_all('tealium_tags') as $tag_name => $tag_value) {
-      rmg_tealium_set_tag($tag_name, $tag_value);
+      try {
+        rmg_tealium_set_tag($tag_name, $tag_value);
+      }
+      catch (Exception $exception) {
+        watchdog_exception('rmg_tealium', $exception);
+      }
     }
 
     // Tealium JS Fix (no idea what this is for).
@@ -219,8 +225,12 @@ function rmg_tealium_record_errors($form, &$form_state) {
     $form_errors = array_map('strip_tags', $form_errors);
     $form_errors = array_map('trim', $form_errors);
 
-    rmg_tealium_set_tag('pageErrorType', 'Field Validation');
-    rmg_tealium_set_tag('pageErrorMessage', $form_errors);
+    try {
+      rmg_tealium_set_tag('pageErrorType', 'Field Validation');
+      rmg_tealium_set_tag('pageErrorMessage', $form_errors);    }
+    catch (Exception $exception) {
+      watchdog_exception('rmg_tealium', $exception);
+    }
   }
 
 }
@@ -253,7 +263,12 @@ function rmg_tealium_preprocess_region(&$vars) {
  */
 function rmg_tealium_google_cse_num_results_alter($total) {
   // Notify Tealium about the new tag.
-  rmg_tealium_set_tag('siteSearchResults', $total);
+  try {
+    rmg_tealium_set_tag('siteSearchResults', $total);
+  }
+  catch (Exception $exception) {
+    watchdog_exception('rmg_tealium', $exception);
+  }
 }
 
 /**
@@ -343,7 +358,7 @@ function rmg_tealium_tokens($type, $tokens, array $data = array(), array $option
  * @param string|bool $token_value
  *   Token Value (optional).
  *
- * @return string
+ * @return array
  *   Return the token value of the given token.
  */
 function rmg_tealium_token($token_key, $token_value = FALSE) {
