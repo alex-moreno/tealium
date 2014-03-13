@@ -29,12 +29,12 @@ function rmg_tealium_tag_notify($tealium_tag_key, $tealium_tag_value, $merge = F
     $tealium_tag_value = (_rmg_tealium_is_json($tealium_tag_value)) ? json_decode($tealium_tag_value, TRUE) : trim($tealium_tag_value);
   }
 
-  if (isset($tealium_tag_key) && isset($tealium_tag_value) && !empty($tealium_tag_key) && !empty($tealium_tag_value)) {
+  if (!empty($tealium_tag_key) && !empty($tealium_tag_value)) {
     try {
       rmg_tealium_set_tag($tealium_tag_key, $tealium_tag_value);
     }
     catch (Exception $e) {
-      watchdog('bing_maps_api', $e->getMessage(), array(), WATCHDOG_ERROR);
+      watchdog('rmg_tealium', $e->getMessage(), array(), WATCHDOG_ERROR);
     }
   }
 }

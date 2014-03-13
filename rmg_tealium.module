@@ -52,7 +52,7 @@ function rmg_tealium_set_tag($key, $value, $overwrite = FALSE) {
       array('@function' => __FUNCTION__),
       WATCHDOG_ERROR
     );
-    throw new Exception('Key required');
+    throw new TealiumException('Key required');
   }
 
   // If the string is JSON, decode it.
