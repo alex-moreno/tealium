@@ -5,7 +5,7 @@
  */
 
 define('RMG_TEALIUM_TOKEN_TYPE', 'tealium_tokens');
-define('RMG_TEALIUM_JS_LIB', '//tags.tiqcdn.com/utag/$account/$profile/$env/utag.js');
+define('RMG_TEALIUM_URL', '//tags.tiqcdn.com/');
 
 // A global require because the helper function will be sued site wide.
 module_load_include('inc', 'rmg_tealium', '/helpers/rmg_tealium');
@@ -118,19 +118,20 @@ function rmg_tealium_permission() {
  */
 function rmg_tealium_build_utag_js() {
   // Default return value.
-  $js_lib = "";
+  $js_lib = '';
   // Tealium Variables.
   $tealium_enabled = variable_get('rmg_tealium_enabled', TRUE);
   $account = variable_get('rmg_tealium_account', '');
   $profile = variable_get('rmg_tealium_profile', '');
   $env = variable_get('rmg_tealium_environment', '');
   // Tags url to cdn.
-  $tealium_script = "//tags.tiqcdn.com/utag/$account/$profile/$env/utag.js";
+  $tealium_script = RMG_TEALIUM_URL . "/utag/$account/$profile/$env/utag.js";
 
   // If we don't have Tealium profile settings or it is not enabled, do nothing.
   if ($tealium_enabled && !empty($account) || !empty($profile) || !empty($env)) {
     // Tags url to cdn.
-    $js_lib = RMG_TEALIUM_JS_LIB;
+    $js_lib = $tealium_script;
+
   }
 
   return $js_lib;
