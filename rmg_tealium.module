@@ -128,7 +128,7 @@ function rmg_tealium_build_utag_js() {
   $tealium_script = RMG_TEALIUM_URL . "/utag/$account/$profile/$env/utag.js";
 
   // If we don't have Tealium profile settings or it is not enabled, do nothing.
-  if ($tealium_enabled && !empty($account) || !empty($profile) || !empty($env)) {
+  if ($tealium_enabled && !empty($account) && !empty($profile) && !empty($env)) {
     // Tags url to cdn.
     $js_lib = $tealium_script;
 
@@ -256,21 +256,6 @@ function rmg_tealium_preprocess_region(&$vars) {
 
 }
 
-/**
- * Catch form errors and store them to be sent to Tealium.
- *
- * This function is appended to the #validate arrays of all
- * Drupal forms by rmg_tealium_form_alter().
- */
-function rmg_tealium_google_cse_num_results_alter($total) {
-  // Notify Tealium about the new tag.
-  try {
-    rmg_tealium_set_tag('siteSearchResults', $total);
-  }
-  catch (Exception $exception) {
-    watchdog_exception('rmg_tealium', $exception);
-  }
-}
 
 /**
  * Implements hook_ctools_plugin_directory().
@@ -350,6 +335,8 @@ function rmg_tealium_tokens($type, $tokens, array $data = array(), array $option
 
   return $replacements;
 }
+
+
 
 /**
  * Helper function to get and set tokens on content plugins.
