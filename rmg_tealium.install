@@ -23,6 +23,33 @@ function rmg_tealium_update_7002() {
 }
 
 /**
+ * Implements hook_update().
+ */
+function rmg_tealium_update_7003() {
+  // Make the rmg_tealium to invoke before the rest.
+  db_update('system')
+    ->fields(array('weight' => 1001))
+    ->condition('name', 'rmg_tealium', '=')
+    ->execute();
+
+  db_update('system')
+    ->fields(array('weight' => 1002))
+    ->condition('name', 'pfw_tealium', '=')
+    ->execute();
+
+  db_update('system')
+    ->fields(array('weight' => 1003))
+    ->condition('name', 'track_and_trace', '=')
+    ->execute();
+
+  db_update('system')
+    ->fields(array('weight' => 1004))
+    ->condition('name', 'pfw_branch_and_depot_finder', '=')
+    ->execute();
+
+}
+
+/**
  * Implements hook_install().
  */
 function rmg_tealium_install() {
