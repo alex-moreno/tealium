@@ -37,3 +37,11 @@ function rmg_tealium_install() {
     ->execute();
 
 }
+
+
+/**
+ * Implements hook_install().
+ */
+function rmg_tealium_uninstall() {
+  variable_del('rmg_tealium_javascript_scope_theme');
+}
