@@ -1,11 +1,8 @@
 <?php
 /**
- * Implements hook_enable().
+ * Implements hook_update().
  */
 function rmg_tealium_update_7001() {
-
-  // Set javascript scope in precontent.
-  variable_set('rmg_tealium_javascript_scope_theme', 'precontent');
 
   // Make the rmg_tealium module invoke last.
   db_update('system')
@@ -15,8 +12,18 @@ function rmg_tealium_update_7001() {
 
 }
 
+
 /**
- * Implements hook_enable().
+ * Implements hook_update().
+ */
+function rmg_tealium_update_7002() {
+
+  // Set javascript scope in precontent.
+  variable_set('rmg_tealium_javascript_scope_theme', 'precontent');
+}
+
+/**
+ * Implements hook_install().
  */
 function rmg_tealium_install() {
 
