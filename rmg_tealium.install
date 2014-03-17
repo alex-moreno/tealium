@@ -3,6 +3,10 @@
  * Implements hook_enable().
  */
 function rmg_tealium_update_7001() {
+
+  // Set javascript scope in precontent.
+  variable_set('rmg_tealium_javascript_scope_theme', 'precontent');
+
   // Make the rmg_tealium module invoke last.
   db_update('system')
     ->fields(array('weight' => 1000))
@@ -15,6 +19,10 @@ function rmg_tealium_update_7001() {
  * Implements hook_enable().
  */
 function rmg_tealium_install() {
+
+  // Set javascript scope in precontent.
+  variable_set('rmg_tealium_javascript_scope_theme', 'precontent');
+
   // Make the rmg_tealium module invoke last.
   db_update('system')
     ->fields(array('weight' => 1000))
