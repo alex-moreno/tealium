@@ -40,7 +40,7 @@ function rmg_tealium_install() {
 
 
 /**
- * Implements hook_install().
+ * Implements hook_uninstall().
  */
 function rmg_tealium_uninstall() {
   variable_del('rmg_tealium_javascript_scope_theme');
