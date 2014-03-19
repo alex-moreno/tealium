@@ -246,7 +246,7 @@ function rmg_tealium_preprocess_region(&$vars) {
   // Region names of (header|footer) collide with drupal_add_js()'s
   // (header|footer) labels.
   $scope_theme = variable_get('rmg_tealium_javascript_scope_theme', '');
-  if (!empty($scope_theme) && $scope_theme == 'footer' && $scope_theme != 'header'
+  if (!empty($scope_theme) && $scope_theme != 'footer' && $scope_theme != 'header'
     && $vars['region'] == $scope_theme) {
 
     // Inject Tealium javascript into page.

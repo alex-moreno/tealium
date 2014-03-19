@@ -55,7 +55,7 @@ function rmg_tealium_admin() {
   $form['javascript']['rmg_tealium_javascript_async_mode'] = array(
     '#type' => 'radios',
     '#title' => t('Attachment behaviour'),
-    '#default_value' => variable_get('rmg_tealium_javascript_behaviour', 0),
+    '#default_value' => variable_get('rmg_tealium_javascript_async_mode', 0),
     '#options' => array(
       0 => 'Synchronous',
       1 => 'Asynchronous, fired by document.ready',
@@ -101,7 +101,7 @@ function rmg_tealium_admin_validate($form, &$form_state) {
     $form_state['values']['rmg_tealium_javascript_scope_theme'] == 'footer'
   ) {
     form_set_error(
-      'rmg_tealium_javascript_behaviour',
+      'rmg_tealium_javascript_async_mode',
       t("Header and footer can't be used as theme-specific attachment locations. Limitation of Drupal core.")
     );
   }
@@ -111,7 +111,7 @@ function rmg_tealium_admin_validate($form, &$form_state) {
  * Form submission handler for rmg_tealium_admin_settings_form().
  */
 function rmg_tealium_admin_submit($form, &$form_state) {
-  if ($form_state['values']['rmg_tealium_javascript_behaviour'] != 0) {
+  if ($form_state['values']['rmg_tealium_javascript_async_mode'] != 0) {
     drupal_set_message(
       t('You have set Tealium to load asynchronously. This may cause problems if you use MVT/Web Trends pixels.'),
       'warning'
