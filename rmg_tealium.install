@@ -1,6 +1,8 @@
 <?php
 /**
  * Implements hook_update().
+ *
+ * Corrected the module weights.
  */
 function rmg_tealium_update_7001() {
 
@@ -14,6 +16,8 @@ function rmg_tealium_update_7001() {
 
 /**
  * Implements hook_update().
+ *
+ * Added js to precontent region.
  */
 function rmg_tealium_update_7002() {
   // Set javascript scope in precontent.
