@@ -210,12 +210,6 @@ function rmg_tealium_form_alter(&$form, &$form_state, $form_id) {
   if (variable_get('rmg_tealium_enabled', TRUE)) {
     // Add Tealium handler to the form.
     $form['#validate'][] = 'rmg_tealium_record_errors';
-
-    // Special case of search form for which the validation is made in its
-    // submit function.
-    if ($form_id == 'search_form') {
-      $form['#submit'][] = 'rmg_tealium_record_errors';
-    }
   }
 }
 
@@ -234,12 +228,11 @@ function rmg_tealium_record_errors($form, &$form_state) {
 
     try {
       rmg_tealium_set_tag('pageErrorType', 'Field Validation');
-      rmg_tealium_set_tag('pageErrorMessage', $form_errors);
 
-      // Special error message for depot & branch finder pages.
-      if ($form['#form_id'] == 'depot_finder_form' ||
-        $form['#form_id'] == 'branch_finder_form') {
-        rmg_tealium_set_tag('pageErrorMessage', 'Invalid postcode', TRUE);
+      // Do not override already set error messages.
+      $manager = TealiumTagManager::getInstance();
+      if ($tag_value = $manager->get('pageErrorMessage') && !empty($tag_value)) {
+        rmg_tealium_set_tag('pageErrorMessage', $form_errors);
       }
     }
     catch (Exception $exception) {
