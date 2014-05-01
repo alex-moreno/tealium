@@ -83,10 +83,15 @@ function rmg_tealium_set_tag($key, $value, $overwrite = FALSE) {
 /**
  * Get the Tealium tags as a JSON string.
  *
+ * @param bool $json_encode
+ *  Default to TRUE. Will use drupal drupal_json_encode if true.
+ *  Will format the result by itself if false, which means the values
+ *  and keys won't have any of their chars replaced or encoded.
+ *
  * @return string
  *   Json-encoded array of tags.
  */
-function rmg_tealium_get_tags() {
+function rmg_tealium_get_tags($json_encode = TRUE) {
   $tealium_tag_manager = TealiumTagManager::getInstance();
 
   $values = $tealium_tag_manager->getAll();
@@ -94,7 +99,21 @@ function rmg_tealium_get_tags() {
     $values[$k] = implode(',', $v);
   }
 
-  return drupal_json_encode($values);
+  if ($json_encode) {
+    $encoded = drupal_json_encode($values);
+  }
+  else {
+    // Format by hand but without replacing any char.
+    // Inspired by drupal_json_encode_helper.
+    $output = array();
+    foreach ($values as $key => $value) {
+      $output[] = '"' . strval($key) . '":"' . $value . '"';
+    }
+
+    $encoded = '{' . implode(', ', $output) . '}';
+  }
+
+  return $encoded;
 }
 
 /**
@@ -167,7 +186,7 @@ function rmg_tealium_preprocess_page(&$vars) {
       'if (typeof(window.s) === "undefined") {window.s = new Object;}',
       array('type' => 'inline', 'scope' => $scope)
     );
-    drupal_add_js('var utag_data = ' . rmg_tealium_get_tags(),
+    drupal_add_js('var utag_data = ' . rmg_tealium_get_tags(FALSE),
       array('type' => 'inline', 'scope' => $scope));
 
     // Add the script in the admin-selected region.
