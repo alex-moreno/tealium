@@ -105,6 +105,7 @@ function rmg_tealium_get_tags($json_encode = TRUE) {
   else {
     // Format by hand but without replacing any char.
     // Inspired by drupal_json_encode_helper.
+    // Example of otherwise replaced char: '\' by '\/'.
     $output = array();
     foreach ($values as $key => $value) {
       $output[] = '"' . strval($key) . '":"' . $value . '"';
