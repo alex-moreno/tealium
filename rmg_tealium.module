@@ -70,7 +70,15 @@ function rmg_tealium_set_tag($key, $value, $overwrite = FALSE) {
     $value = array($value);
   }
   $value = array_map('trim', $value);
-  $value = array_map('filter_xss', $value);
+
+  // Only filter values that are not in the list.
+  // For security reasons, do not add tags that could be modified by a user's
+  // input in that list.
+  $no_filter_xss_array = variable_get('rmg_tealium_no_filter_xss_list', array());
+  if (!in_array($key, $no_filter_xss_array)) {
+    $value = array_map('filter_xss', $value);
+  }
+
 
   // Save tag(s) to Singleton, so we can pick them up in the theme layer.
   $manager = TealiumTagManager::getInstance();
