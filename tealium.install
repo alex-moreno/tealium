@@ -20,4 +20,8 @@ function tealium_install() {
  */
 function tealium_uninstall() {
   variable_del('tealium_javascript_scope_theme');
+  variable_del('tealium_account');
+  variable_del('tealium_no_filter_xss_list');
+  variable_del('tealium_profile');
+  variable_del('tealium_environment');
 }
