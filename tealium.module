@@ -7,7 +7,7 @@
 define('TEALIUM_TOKEN_TYPE', 'tealium_tokens');
 define('TEALIUM_URL', '//tags.tiqcdn.com');
 
-// A global require because the helper function will be sued site wide.
+// A global require because the helper function will be used site wide.
 module_load_include('inc', 'tealium', '/helpers/tealium');
 
 /**
@@ -34,7 +34,7 @@ function tealium_menu() {
  * Appends new values to existing keys by default.
  *
  * @param string $key
- *   Tealium tag key. Ex: s.events
+ *   Tealium tag key. e.g.: s.events
  * @param mixed $value
  *   String, JSON-encoded string, or array of strings.
  * @param bool $overwrite
