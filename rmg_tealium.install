@@ -4,12 +4,12 @@
  *
  * Corrected the module weights.
  */
-function rmg_tealium_update_7001() {
+function tealium_update_7001() {
 
-  // Make the rmg_tealium module invoke last.
+  // Make the tealium module invoke last.
   db_update('system')
     ->fields(array('weight' => 1000))
-    ->condition('name', 'rmg_tealium', '=')
+    ->condition('name', 'tealium', '=')
     ->execute();
 
 }
@@ -19,23 +19,23 @@ function rmg_tealium_update_7001() {
  *
  * Added js to precontent region.
  */
-function rmg_tealium_update_7002() {
+function tealium_update_7002() {
   // Set javascript scope in precontent.
-  variable_set('rmg_tealium_javascript_scope_theme', 'precontent');
+  variable_set('tealium_javascript_scope_theme', 'precontent');
 }
 
 /**
  * Implements hook_install().
  */
-function rmg_tealium_install() {
+function tealium_install() {
 
   // Set javascript scope in precontent.
-  variable_set('rmg_tealium_javascript_scope_theme', 'precontent');
+  variable_set('tealium_javascript_scope_theme', 'precontent');
 
-  // Make the rmg_tealium module invoke last.
+  // Make the tealium module invoke last.
   db_update('system')
     ->fields(array('weight' => 1000))
-    ->condition('name', 'rmg_tealium', '=')
+    ->condition('name', 'tealium', '=')
     ->execute();
 
 }
@@ -43,6 +43,6 @@ function rmg_tealium_install() {
 /**
  * Implements hook_uninstall().
  */
-function rmg_tealium_uninstall() {
-  variable_del('rmg_tealium_javascript_scope_theme');
+function tealium_uninstall() {
+  variable_del('tealium_javascript_scope_theme');
 }

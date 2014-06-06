@@ -7,7 +7,7 @@
 /**
  * Tealium Administrative settings form.
  */
-function rmg_tealium_admin() {
+function tealium_admin() {
   $form = array();
 
   $form['tealium'] = array(
@@ -22,40 +22,40 @@ function rmg_tealium_admin() {
     '#weight' => 1,
   );
 
-  $form['tealium']['rmg_tealium_account'] = array(
+  $form['tealium']['tealium_account'] = array(
     '#title' => t('Account'),
     '#type' => 'textfield',
-    '#default_value' => variable_get('rmg_tealium_account', ''),
+    '#default_value' => variable_get('tealium_account', ''),
     '#required' => TRUE,
   );
 
-  $form['tealium']['rmg_tealium_profile'] = array(
+  $form['tealium']['tealium_profile'] = array(
     '#title' => t('Profile'),
     '#type' => 'textfield',
-    '#default_value' => variable_get('rmg_tealium_profile', ''),
+    '#default_value' => variable_get('tealium_profile', ''),
     '#required' => TRUE,
   );
 
-  $form['tealium']['rmg_tealium_environment'] = array(
+  $form['tealium']['tealium_environment'] = array(
     '#title' => t('Environment'),
     '#type' => 'textfield',
-    '#default_value' => variable_get('rmg_tealium_environment', ''),
+    '#default_value' => variable_get('tealium_environment', ''),
     '#required' => TRUE,
   );
 
-  $form['tealium']['rmg_tealium_enabled'] = array(
+  $form['tealium']['tealium_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable Tealium'),
-    '#default_value' => variable_get('rmg_tealium_enabled', TRUE),
+    '#default_value' => variable_get('tealium_enabled', TRUE),
     '#description' => t('Enable Tealium reporting.'),
   );
 
   // Formatted as radios because there are other ways to attach JS that may be
   // supported in the future (eg async attribute).
-  $form['javascript']['rmg_tealium_javascript_async_mode'] = array(
+  $form['javascript']['tealium_javascript_async_mode'] = array(
     '#type' => 'radios',
     '#title' => t('Attachment behaviour'),
-    '#default_value' => variable_get('rmg_tealium_javascript_async_mode', 0),
+    '#default_value' => variable_get('tealium_javascript_async_mode', 0),
     '#options' => array(
       0 => 'Synchronous',
       1 => 'Asynchronous, fired by document.ready',
@@ -64,10 +64,10 @@ function rmg_tealium_admin() {
   );
 
   // Javascript can be attached in the header or the footer.
-  $form['javascript']['rmg_tealium_javascript_scope'] = array(
+  $form['javascript']['tealium_javascript_scope'] = array(
     '#type' => 'radios',
     '#title' => t('Attachment location (default)'),
-    '#default_value' => variable_get('rmg_tealium_javascript_scope', 'footer'),
+    '#default_value' => variable_get('tealium_javascript_scope', 'footer'),
     '#options' => array(
       'header' => 'Header',
       'footer' => 'Footer',
@@ -76,17 +76,17 @@ function rmg_tealium_admin() {
   );
 
   // Javascript can be attached in the header or the footer.
-  $form['javascript']['rmg_tealium_javascript_scope_theme'] = array(
+  $form['javascript']['tealium_javascript_scope_theme'] = array(
     '#type' => 'textfield',
     '#title' => t('Attachment location (theme-specific)'),
-    '#default_value' => variable_get('rmg_tealium_javascript_scope_theme', ''),
+    '#default_value' => variable_get('tealium_javascript_scope_theme', ''),
     '#description' => t(
       'The Tealium JS can be attached to a theme region. If you set this, it will <strong>override</strong> the header/footer attachment above.'
     ),
   );
 
-  $form['#validate'][] = 'rmg_tealium_admin_validate';
-  $form['#submit'][] = 'rmg_tealium_admin_submit';
+  $form['#validate'][] = 'tealium_admin_validate';
+  $form['#submit'][] = 'tealium_admin_submit';
 
   $form = system_settings_form($form);
 
@@ -94,24 +94,24 @@ function rmg_tealium_admin() {
 }
 
 /**
- * Form validation handler for rmg_tealium_admin_settings_form().
+ * Form validation handler for tealium_admin_settings_form().
  */
-function rmg_tealium_admin_validate($form, &$form_state) {
-  if ($form_state['values']['rmg_tealium_javascript_scope_theme'] == 'header' ||
-    $form_state['values']['rmg_tealium_javascript_scope_theme'] == 'footer'
+function tealium_admin_validate($form, &$form_state) {
+  if ($form_state['values']['tealium_javascript_scope_theme'] == 'header' ||
+    $form_state['values']['tealium_javascript_scope_theme'] == 'footer'
   ) {
     form_set_error(
-      'rmg_tealium_javascript_async_mode',
+      'tealium_javascript_async_mode',
       t("Header and footer can't be used as theme-specific attachment locations. Limitation of Drupal core.")
     );
   }
 }
 
 /**
- * Form submission handler for rmg_tealium_admin_settings_form().
+ * Form submission handler for tealium_admin_settings_form().
  */
-function rmg_tealium_admin_submit($form, &$form_state) {
-  if ($form_state['values']['rmg_tealium_javascript_async_mode'] != 0) {
+function tealium_admin_submit($form, &$form_state) {
+  if ($form_state['values']['tealium_javascript_async_mode'] != 0) {
     drupal_set_message(
       t('You have set Tealium to load asynchronously. This may cause problems if you use MVT/Web Trends pixels.'),
       'warning'

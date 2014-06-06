@@ -95,7 +95,7 @@ function ctools_context_tealium_default_convert_list() {
   if (module_exists('token')) {
     if ($token_substitution_class = tealium_default_context_get_setting(TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME)) {
       // We fetch the list of tokens.
-      $tokens = rmg_tealium_token_info();
+      $tokens = tealium_token_info();
       $tealium_tokens = $tokens['tokens'];
       foreach ($tealium_tokens['tealium_tokens'] as $index => $token) {
         $list[$index] = $index;
@@ -117,7 +117,7 @@ function ctools_context_tealium_default_convert($context, $type) {
   if (module_exists('token') && isset($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}) &&
     !empty($context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME})) {
     // List of tokens and return them in as array.
-    $list_of_tokens = rmg_tealium_token_info();
+    $list_of_tokens = tealium_token_info();
     $key = $list_of_tokens['tokens'][$context->data->{TEALIUM_SUBSTITUTION_TOKEN_CLASS_FIELD_NAME}];
 
     if (!empty($key)) {
