@@ -1,30 +1,5 @@
 <?php
 /**
- * Implements hook_update().
- *
- * Corrected the module weights.
- */
-function tealium_update_7001() {
-
-  // Make the tealium module invoke last.
-  db_update('system')
-    ->fields(array('weight' => 1000))
-    ->condition('name', 'tealium', '=')
-    ->execute();
-
-}
-
-/**
- * Implements hook_update().
- *
- * Added js to precontent region.
- */
-function tealium_update_7002() {
-  // Set javascript scope in precontent.
-  variable_set('tealium_javascript_scope_theme', 'precontent');
-}
-
-/**
  * Implements hook_install().
  */
 function tealium_install() {
