@@ -5,7 +5,7 @@
  */
 
 define('TEALIUM_TOKEN_TYPE', 'tealium_tokens');
-define('TEALIUM_URL', '//tags.tiqcdn.com/');
+define('TEALIUM_URL', '//tags.tiqcdn.com');
 
 // A global require because the helper function will be sued site wide.
 module_load_include('inc', 'tealium', '/helpers/tealium');
@@ -166,7 +166,47 @@ function tealium_build_utag_js() {
 }
 
 /**
+ * Implements hook_js_alter().
+ *
+ * Latest place we can add the Tealium tags to the page.
+ */
+function tealium_js_alter(&$javascript) {
+  $tealium_script = tealium_build_utag_js();
+  // If tealium is enabled.
+  if ($tealium_script != '') {
+  // Fire all the hook-defined tags.
+    foreach (module_invoke_all('tealium_tags') as $tag_name => $tag_value) {
+      try {
+        tealium_set_tag($tag_name, $tag_value);
+      }
+      catch (Exception $exception) {
+        watchdog_exception('tealium', $exception);
+      }
+    }
+    $scope = variable_get('tealium_javascript_scope_theme', '');
+    if (empty($scope)) {
+      $scope = variable_get('tealium_javascript_scope', 'footer');
+    }
+    // Inject tags into page.
+    $javascript[] = array(
+      'type' => 'inline',
+      'group' => 0,
+      'every_page' => FALSE,
+      'weight' => 0.025,
+      'scope' => $scope,
+      'cache' => TRUE,
+      'defer' => FALSE,
+      'preprocess' => TRUE,
+      'version' => NULL,
+      'data' => 'var utag_data = ' . tealium_get_tags(FALSE),
+    );
+  }
+}
+
+/**
  * Implements hook_preprocess_page().
+ *
+ * Add the Tealium script to the page.
  */
 function tealium_preprocess_page(&$vars) {
   $sync = variable_get('tealium_javascript_async_mode', 0);
@@ -180,23 +220,11 @@ function tealium_preprocess_page(&$vars) {
   $tealium_script = tealium_build_utag_js();
   // If tealium is enabled.
   if ($tealium_script != '') {
-    // Fire all the hook-defined tags.
-    foreach (module_invoke_all('tealium_tags') as $tag_name => $tag_value) {
-      try {
-        tealium_set_tag($tag_name, $tag_value);
-      }
-      catch (Exception $exception) {
-        watchdog_exception('tealium', $exception);
-      }
-    }
-
     // Tealium JS Fix (no idea what this is for).
     drupal_add_js(
       'if (typeof(window.s) === "undefined") {window.s = new Object;}',
       array('type' => 'inline', 'scope' => $scope)
     );
-    drupal_add_js('var utag_data = ' . tealium_get_tags(FALSE),
-      array('type' => 'inline', 'scope' => $scope));
 
     // Add the script in the admin-selected region.
     switch ($sync) {
