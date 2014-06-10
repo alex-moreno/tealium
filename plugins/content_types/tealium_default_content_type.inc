@@ -27,14 +27,14 @@ $plugin = array(
  */
 function tealium_default_content_type_render($subtype, $conf, $args, $context) {
   $block = new stdClass();
-  $default_data_points = _rmg_tealium_get_default_data_points_from_context();
+  $default_data_points = _tealium_get_default_data_points_from_context();
 
   if (!empty($conf)) {
     foreach ($conf as $key => $value) {
       $value = ctools_context_keyword_substitute($value, array(), $context);
       if (!empty($value) && in_array($key, $default_data_points)) {
         // Time to send the valug to Tealium.
-        rmg_tealium_tag_notify($key, $value);
+        tealium_tag_notify($key, $value);
       }
     }
 
@@ -44,12 +44,12 @@ function tealium_default_content_type_render($subtype, $conf, $args, $context) {
 
 /**
  * Returns an edit form for custom type settings.
- * @see _rmg_tealium_content_type_render_content_type_edit_form_submit()
+ * @see _tealium_content_type_render_content_type_edit_form_submit()
  * @ingroup forms
  */
 function tealium_default_content_type_render_content_type_edit_form($form, &$form_state) {
   $conf = $form_state['conf'];
-  $default_data_points = _rmg_tealium_get_default_data_points_from_context();
+  $default_data_points = _tealium_get_default_data_points_from_context();
 
   if (!empty($default_data_points)) {
     foreach ($default_data_points as $default_data_point) {
@@ -70,7 +70,7 @@ function tealium_default_content_type_render_content_type_edit_form($form, &$for
  */
 function tealium_default_content_type_render_content_type_edit_form_submit(&$form, &$form_state) {
   // Get data points.
-  $default_data_points = _rmg_tealium_get_default_data_points_from_context();
+  $default_data_points = _tealium_get_default_data_points_from_context();
 
   // Map the values.
   if (!empty($default_data_points)) {
@@ -86,8 +86,8 @@ function tealium_default_content_type_render_content_type_edit_form_submit(&$for
  * @return array
  *   Return the data points.
  */
-function _rmg_tealium_get_default_data_points_from_context() {
-  $defined_context_data_points = _rmg_tealium_get_default_data_points();
+function _tealium_get_default_data_points_from_context() {
+  $defined_context_data_points = _tealium_get_default_data_points();
 
   if (!empty($defined_context_data_points)) {
     return array_keys($defined_context_data_points);
@@ -102,7 +102,7 @@ function _rmg_tealium_get_default_data_points_from_context() {
  * @return array
  *   Return the data points
  */
-function _rmg_tealium_get_default_data_points() {
+function _tealium_get_default_data_points() {
   return array(
     'pageName' => t('Custom page name if you need to override the one set site wide.'),
     'pageApplicationName' => t('pageApplicationName Tealium Data point'),

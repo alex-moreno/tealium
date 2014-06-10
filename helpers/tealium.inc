@@ -23,18 +23,18 @@
  *   session. Default will be boolean FALSE and the tag will return only on a
  *   request.
  */
-function rmg_tealium_tag_notify($tealium_tag_key, $tealium_tag_value, $merge = FALSE, $is_session_based = FALSE) {
+function tealium_tag_notify($tealium_tag_key, $tealium_tag_value, $merge = FALSE, $is_session_based = FALSE) {
   // This is for the modules that sets json encoded strings on panels.
   if (is_array($tealium_tag_value) == FALSE) {
-    $tealium_tag_value = (_rmg_tealium_is_json($tealium_tag_value)) ? json_decode($tealium_tag_value, TRUE) : trim($tealium_tag_value);
+    $tealium_tag_value = (_tealium_is_json($tealium_tag_value)) ? json_decode($tealium_tag_value, TRUE) : trim($tealium_tag_value);
   }
 
   if (!empty($tealium_tag_key) && !empty($tealium_tag_value)) {
     try {
-      rmg_tealium_set_tag($tealium_tag_key, $tealium_tag_value);
+      tealium_set_tag($tealium_tag_key, $tealium_tag_value);
     }
     catch (Exception $e) {
-      watchdog('rmg_tealium', $e->getMessage(), array(), WATCHDOG_ERROR);
+      watchdog('tealium', $e->getMessage(), array(), WATCHDOG_ERROR);
     }
   }
 }
@@ -48,7 +48,7 @@ function rmg_tealium_tag_notify($tealium_tag_key, $tealium_tag_value, $merge = F
  * @return bool
  *   Return whether it is a JSON endoded object or not.
  */
-function _rmg_tealium_is_json($string) {
+function _tealium_is_json($string) {
   json_decode($string);
   return (json_last_error() == JSON_ERROR_NONE);
 }
