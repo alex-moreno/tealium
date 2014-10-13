@@ -55,7 +55,10 @@ final class TealiumTagManager {
       self::$tags[$key] = array();
     }
 
-    self::$tags[$key][] = $value;
+    // Avoid duplicate values being added to the tag.
+    if (!in_array($value, self::$tags[$key])) {
+      self::$tags[$key][] = $value;
+    }
   }
 
   /**
