@@ -266,7 +266,6 @@ function tealium_form_alter(&$form, &$form_state, $form_id) {
   if (variable_get('tealium_enabled', TRUE)) {
     // Add Tealium handler to the form.
     $form['#validate'][] = 'tealium_record_errors';
-//    array_unshift($form['#validate'], 'tealium_record_errors');
   }
 }
 
