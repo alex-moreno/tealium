@@ -266,6 +266,7 @@ function tealium_form_alter(&$form, &$form_state, $form_id) {
   if (variable_get('tealium_enabled', TRUE)) {
     // Add Tealium handler to the form.
     $form['#validate'][] = 'tealium_record_errors';
+//    array_unshift($form['#validate'], 'tealium_record_errors');
   }
 }
 
@@ -287,15 +288,22 @@ function tealium_record_errors($form, &$form_state) {
 
       // Do not override already set error messages.
       $manager = TealiumTagManager::getInstance();
-      if ($tag_value = $manager->get('pageErrorMessage') && !empty($tag_value)) {
-        tealium_set_tag('pageErrorMessage', $form_errors);
+      $tag_value = $manager->get('pageErrorMessage');
+      if (!empty($tag_value)) {
+        // We are expecting a single error to override the rest of pageErrors.
+        tealium_set_tag('pageErrorMessage', $form_errors[key($form_errors)], TRUE);
+      } else {
+        foreach ($form_errors as $index => $form_error) {
+          if (!empty($form_error)) {
+            tealium_set_tag('pageErrorMessage', '"' . $index . '"' . ':"'  . $form_error . '"');
+          }
+        }
       }
     }
     catch (Exception $exception) {
       watchdog_exception('tealium', $exception);
     }
   }
-
 }
 
 /**
