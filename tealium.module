@@ -287,15 +287,27 @@ function tealium_record_errors($form, &$form_state) {
 
       // Do not override already set error messages.
       $manager = TealiumTagManager::getInstance();
-      if ($tag_value = $manager->get('pageErrorMessage') && !empty($tag_value)) {
-        tealium_set_tag('pageErrorMessage', $form_errors);
+      $tag_value = $manager->get('pageErrorMessage');
+      // If the tag is empty, we don't want to do anything else to that one.
+      if (empty($tag_value)) {
+        if (sizeof($form_errors) > 1){
+          // Action for multiple errors on that page.
+          foreach ($form_errors as $index => $form_error) {
+            if (!empty($form_error)) {
+              tealium_set_tag('pageErrorMessage', "\"$index\": \"$form_error\"");
+            }
+          }
+        }
+        else {
+          // Action for one single error.
+          tealium_set_tag('pageErrorMessage', $form_errors[key($form_errors)]);
+        }
       }
     }
     catch (Exception $exception) {
       watchdog_exception('tealium', $exception);
     }
   }
-
 }
 
 /**
