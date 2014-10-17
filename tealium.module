@@ -294,7 +294,7 @@ function tealium_record_errors($form, &$form_state) {
           // Action for multiple errors on that page.
           foreach ($form_errors as $index => $form_error) {
             if (!empty($form_error)) {
-              tealium_set_tag('pageErrorMessage', "\"$index\": \"$form_error\"");
+              tealium_set_tag('pageErrorMessage', "$index\": \"$form_error");
             }
           }
         }
