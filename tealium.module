@@ -147,7 +147,7 @@ function tealium_get_tags($json_encode = TRUE) {
   $values = $tealium_tag_manager->getAll();
   foreach ($values as $k => $v) {
     // If we have a single value array it will mean
-    // we are handlering a standard assignment of a
+    // we are handling a standard assignment of a
     // value to a tag. Otherwise we are handling
     // an array of values.
     if (count($v) > 1) {
