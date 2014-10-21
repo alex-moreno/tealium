@@ -91,14 +91,14 @@ function tealium_set_tag($key, $value, $overwrite = FALSE) {
 /**
  * Save Tealium tags in key/array store with Request scope.
  *
- * Add new array of values note this has different behaviour than
- * tealium_set_tag() that it will overwrite any existing values.
- * This becuase it would be an illegal format.
+ * Add new array of values to teh tealium store. Note this has
+ * different behaviour than tealium_set_tag() that it will overwrite
+ * any existing values. This is becuase it would be an illegal format.
  *
  * @param string $key
  *   Tealium tag key. e.g.: s.events
- * @param mixed $value
- *   String, JSON-encoded string, or array of strings.
+ * @param array $value
+ *   Array of strings.
  *
  * @throws Exception
  *   If $key is not set.
