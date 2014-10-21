@@ -93,7 +93,7 @@ function tealium_set_tag($key, $value, $overwrite = FALSE) {
  *
  * Add new array of values to teh tealium store. Note this has
  * different behaviour than tealium_set_tag() that it will overwrite
- * any existing values. This is becuase it would be an illegal format.
+ * any existing values. This is because it would be an illegal format.
  *
  * @param string $key
  *   Tealium tag key. e.g.: s.events
