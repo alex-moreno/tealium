@@ -91,7 +91,7 @@ function tealium_set_tag($key, $value, $overwrite = FALSE) {
 /**
  * Save Tealium tags in key/array store with Request scope.
  *
- * Add new array of values to teh tealium store. Note this has
+ * Add new array of values to the tealium store. Note this has
  * different behaviour than tealium_set_tag() that it will overwrite
  * any existing values. This is because it would be an illegal format.
  *
