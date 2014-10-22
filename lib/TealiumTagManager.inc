@@ -62,6 +62,18 @@ final class TealiumTagManager {
   }
 
   /**
+   * Add key/array value pair to store.
+   *
+   * @param string $key
+   *   Key to store against.
+   * @param array $values
+   *   Array of values to store.
+   */
+  public function addArray($key, $values) {
+      self::$tags[$key] = $values;
+  }
+
+  /**
    * Return comma-delimited list of tags for the given key.
    *
    * @param string $key

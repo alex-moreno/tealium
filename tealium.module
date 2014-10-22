@@ -89,6 +89,48 @@ function tealium_set_tag($key, $value, $overwrite = FALSE) {
 }
 
 /**
+ * Save Tealium tags in key/array store with Request scope.
+ *
+ * Add new array of values to the tealium store. Note this has
+ * different behaviour than tealium_set_tag() that it will overwrite
+ * any existing values. This is because it would be an illegal format.
+ *
+ * @param string $key
+ *   Tealium tag key. e.g.: s.events
+ * @param array $value
+ *   Array of strings.
+ *
+ * @throws Exception
+ *   If $key is not set.
+ */
+function tealium_set_array_tag($key, $value) {
+  // Tidy up the tag_key.
+  $key = filter_xss(trim($key));
+  if (empty($key)) {
+    watchdog(
+      'tealium',
+      '@function called with an empty key',
+      array('@function' => __FUNCTION__),
+      WATCHDOG_ERROR
+    );
+    throw new TealiumException('Key required');
+  }
+
+  $value = array_map('trim', $value);
+
+  // Only filter values that are not in the list.
+  // For security reasons, do not add tags that could be modified by a user's
+  // input in that list.
+  $no_filter_xss_array = variable_get('tealium_no_filter_xss_list', array());
+  if (!in_array($key, $no_filter_xss_array)) {
+    $value = array_map('filter_xss', $value);
+  }
+
+  $manager = TealiumTagManager::getInstance();
+  $manager->addArray($key, $value);
+}
+
+/**
  * Get the Tealium tags as a JSON string.
  *
  * @param bool $json_encode
@@ -104,7 +146,16 @@ function tealium_get_tags($json_encode = TRUE) {
 
   $values = $tealium_tag_manager->getAll();
   foreach ($values as $k => $v) {
-    $values[$k] = implode(',', $v);
+    // If we have a single value array it will mean
+    // we are handling a standard assignment of a
+    // value to a tag. Otherwise we are handling
+    // an array of values.
+    if (count($v) > 1) {
+      $values[$k] = $v;
+    }
+    else {
+      $values[$k] = implode(',', $v);
+    }
   }
 
   if ($json_encode) {
@@ -116,7 +167,17 @@ function tealium_get_tags($json_encode = TRUE) {
     // Example of otherwise replaced char: '\' by '\/'.
     $output = array();
     foreach ($values as $key => $value) {
-      $output[] = '"' . strval($key) . '":"' . $value . '"';
+      // Firstly we handle an instance of a inner array.
+      if (is_array($value)) {
+        $inner_array = array();
+        foreach ($value as $key_inner => $value_inner) {
+         $inner_array[] = '"' . strval($key_inner) . '":"' . $value_inner . '"';
+        }
+        $output[] = '"' . strval($key) . '":' . '{' . implode(', ', $inner_array) . '}';
+      }
+      else {
+        $output[] = '"' . strval($key) . '":"' . $value . '"';
+      }
     }
 
     $encoded = '{' . implode(', ', $output) . '}';
@@ -291,12 +352,14 @@ function tealium_record_errors($form, &$form_state) {
       // If the tag is empty, we don't want to do anything else to that one.
       if (empty($tag_value)) {
         if (sizeof($form_errors) > 1){
+          $page_errors = array();
           // Action for multiple errors on that page.
           foreach ($form_errors as $index => $form_error) {
             if (!empty($form_error)) {
-              tealium_set_tag('pageErrorMessage', "$index\": \"$form_error");
+              $page_errors[$index] = $form_error;
             }
           }
+          tealium_set_array_tag('pageErrorMessage', $page_errors);
         }
         else {
           // Action for one single error.
