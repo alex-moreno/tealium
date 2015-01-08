@@ -195,6 +195,10 @@ function tealium_permission() {
       'title' => t('Configure Tealium'),
       'description' => t("Allows the user to change the Tealium module's configuration."),
     ),
+    'edit tealium tags' => array(
+      'title' => t('Edit Tealium tags for supported content types.'),
+      'description' => t('Allows a user access to additional Tealium tag settings when editing supported content types.'),
+    ),
   );
 }
 
@@ -506,4 +510,205 @@ function tealium_token($token_key, $token_value = FALSE) {
 
   // Return all the array (list of tokens functionality).
   return $pfw_tokens;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds the ability to edit tealium tags to the node form.
+ */
+function tealium_form_node_form_alter(&$form, &$form_state, $form_id) {
+  // If per-node tagging is disabled, return early.
+  if (!variable_get('tealium_user_tags', TRUE)) {
+    return;
+  }
+
+  // Extract the content type of the node in order to check if tagging is
+  // supported for that type.
+  $type = isset($form['type']['#value']) ? $form['type']['#value'] : NULL;
+
+  // Check if per-node tagging is supported by the type and the user
+  // has permissions.
+  if (tealium_supported_type($type) && user_access('edit tealium tags')) {
+    // Add a validation handler.
+    $form['#validate'][] = 'tealium_node_form_validate';
+
+    // Add submit handler for storing additional tealium tags.
+    $form['actions']['submit']['#submit'][] = 'tealium_node_form_submit';
+
+    $tags = '';
+    if (isset($form_state['node']->nid)) {
+      // Load any existing tag values.
+      $tags = _tealium_get_tag_string($form_state['node']->nid);
+    }
+
+    // Add options to form in additional settings group.
+    $form['tealium'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Tealium tags'),
+      '#description' => t('Tealium tags can be added or removed for this node.  Tags should be name/value pairs and on their own line.'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#weight' => 10,
+      '#group' => 'additional_settings',
+    );
+
+    $form['tealium']['tealium_tags'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Tealium Tags (this node only)'),
+      '#default_value' => $tags,
+      '#required' => FALSE,
+    );
+  }
+}
+
+/**
+ * Validation handler for the additional Tealium settings.
+ */
+function tealium_node_form_validate($form, $form_state) {
+  // Check that the input conforms to the format we expect.
+  if (isset($form_state['values']['tealium_tags'])) {
+    $lines = explode("\r\n", $form_state['values']['tealium_tags']);
+
+    foreach ($lines as $line) {
+      if (!strpos($line, ':')) {
+        form_set_error('tealium_tags', t('Tag format is incorrect.'));
+      }
+    }
+  }
+}
+
+/**
+ * Additional submit handler to deal with user-defined Tealium tags for a node.
+ */
+function tealium_node_form_submit($form, &$form_state) {
+  $nid = $form_state['values']['nid'];
+  if (empty($form_state['values']['tealium_tags'])) {
+    // Remove any existing tags.
+    _tealium_delete_tags_for_node($nid);
+    return;
+  }
+
+  // Store the tealium tags.
+  db_merge('tealium_node_tags')
+    ->key(array('nid' => $nid))
+    ->fields(array(
+      'tags' => $form_state['values']['tealium_tags'],
+    ))
+    ->execute();
+}
+
+/**
+ * Check if user tealium tagging is supported for a given content type.
+ *
+ * @param string $type
+ *   The machine name of the content type to check.
+ *
+ * @return bool
+ *   TRUE if supported, FALSE otherwise.
+ */
+function tealium_supported_type($type) {
+  // Treat NULL as unsupported.
+  if ($type == NULL) {
+    return FALSE;
+  }
+
+  $supported_types = array_filter(variable_get('tealium_content_types', array()));
+  return (in_array($type, array_keys($supported_types)));
+}
+
+/**
+ * Given a node ID, load and return any stored tealium tags for that node.
+ *
+ * @param int $nid
+ *   The node ID.
+ *
+ * @return array
+ *   Associative array of tags associated with the node ID.
+ */
+function tealium_load_tags($nid) {
+  $tags = array();
+
+  // First, load the tags associated with the node.
+  $result = _tealium_get_tag_string($nid);
+
+  if (!empty($result)) {
+    // Extract the tags.
+    $tags = _tealium_tags_to_array($result);
+  }
+
+  return $tags;
+}
+
+/**
+ * Get the original string of tags entered by the user, for a given node ID.
+ *
+ * @param int $nid
+ *   The node ID to get the tag string for.
+ *
+ * @return string
+ *   The string, or a zero-length string if none found.
+ */
+function _tealium_get_tag_string($nid) {
+  $result = db_select('tealium_node_tags', 't')
+    ->fields('t', array('tags'))
+    ->condition('nid', $nid, '=')
+    ->execute()
+    ->fetchAssoc();
+
+  if (is_array($result)) {
+    return reset($result);
+  }
+
+  return '';
+}
+
+/**
+ * Delete any stored tags associated with the supplied node ID.
+ *
+ * @param int $nid
+ *   The node identifier to delete tags for.
+ */
+function _tealium_delete_tags_for_node($nid) {
+  db_delete('tealium_node_tags')->condition('nid', $nid)->execute();
+}
+
+/**
+ * Parse lines of tags formatted as key/value pairs and convert to array.
+ *
+ * The expected input format is "<key>:<value>\n<key>:<value>".
+ *
+ * @param string $input
+ *   The input string.
+ *
+ * @return array
+ *   An associative array of tags.
+ */
+function _tealium_tags_to_array($input) {
+  $input_tags = explode("\r\n", $input);
+  $tags = array();
+  foreach ($input_tags as $tag) {
+    list($key, $value) = explode(':', $tag);
+    $tags[trim($key)] = trim($value);
+  }
+  return array_filter($tags);
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function tealium_node_view($node, $view_mode) {
+  // If per-node tagging is disabled or not sconfigured for this type, return.
+  if (!variable_get('tealium_user_tags', TRUE) || !tealium_supported_type($node->type)) {
+    return;
+  }
+
+  // We only support full view mode for now.
+  if ($view_mode == 'full') {
+    foreach (tealium_load_tags($node->nid) as $key => $value) {
+      if (!empty($value)) {
+        tealium_set_tag($key, $value);
+      }
+    }
+  }
 }
