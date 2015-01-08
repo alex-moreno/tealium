@@ -657,6 +657,7 @@ function _tealium_get_tag_string($nid) {
     ->fetchAssoc();
 
   if (is_array($result)) {
+    // There is only be one entry per node; nid is the primary key.
     return reset($result);
   }
 
