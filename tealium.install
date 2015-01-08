@@ -23,6 +23,8 @@ function tealium_uninstall() {
   variable_del('tealium_no_filter_xss_list');
   variable_del('tealium_profile');
   variable_del('tealium_environment');
+  variable_del('tealium_content_types');
+  variable_del('tealium_user_tags');
 }
 
 /**
