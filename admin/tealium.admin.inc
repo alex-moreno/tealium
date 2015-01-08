@@ -85,6 +85,36 @@ function tealium_admin() {
     ),
   );
 
+  // Settings for node-specific Tealium tags.
+  $form['tealium_user_tags'] = array(
+    '#title' => t('Enabled per-node Tealium tags'),
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('tealium_user_tags', 1),
+  );
+
+  $form['tealium_content_types'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Supported content types'),
+    '#description' => t('Tealium tags can be added or removed for nodes of the selected content types.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+  );
+
+  $existing_settings = variable_get('tealium_content_types');
+
+  // Create checkboxes for all node types.
+  foreach (node_type_get_types() as $type => $info) {
+    // Check if we have an existing (default) value for the type.
+    $default = isset($existing_settings[$type]) ? $existing_settings[$type] : 0;
+
+    $form['tealium_content_types'][$type] = array(
+      '#title' => $type,
+      '#type' => 'checkbox',
+      '#default_value' => $default,
+    );
+  }
+
   $form['#validate'][] = 'tealium_admin_validate';
   $form['#submit'][] = 'tealium_admin_submit';
 
