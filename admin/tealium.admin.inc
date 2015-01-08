@@ -89,7 +89,7 @@ function tealium_admin() {
   $form['tealium_user_tags'] = array(
     '#title' => t('Enabled per-node Tealium tags'),
     '#type' => 'checkbox',
-    '#default_value' => variable_get('b2b_tealium_user_tags', 1),
+    '#default_value' => variable_get('tealium_user_tags', 1),
   );
 
   $form['tealium_content_types'] = array(
