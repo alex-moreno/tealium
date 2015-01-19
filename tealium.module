@@ -713,3 +713,32 @@ function tealium_node_view($node, $view_mode) {
     }
   }
 }
+
+/**
+ * Implements hook_google_cse_num_results_alter().
+ *
+ * Applies siteSearchResults tag on google_cse search.
+ */
+function tealium_google_cse_num_results_alter($total) {
+  // Notify Tealium about the new tag.
+  try {
+    tealium_set_tag('siteSearchResults', $total);
+  }
+  catch (Exception $exception) {
+    watchdog_exception('tealium', $exception);
+  }
+}
+
+/**
+ * Implements hook_google_cse_searched_alter().
+ *
+ * Applies siteSearchTerm tag on google_cse search.
+ */
+function tealium_google_cse_searched_keys_alter($keys) {
+  try {
+    tealium_set_tag('siteSearchTerm', $keys);
+  }
+  catch (Exception $exception) {
+    watchdog_exception('tealium', $exception);
+  }
+}
