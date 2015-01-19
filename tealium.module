@@ -708,7 +708,7 @@ function tealium_node_view($node, $view_mode) {
   if ($view_mode == 'full') {
     foreach (tealium_load_tags($node->nid) as $key => $value) {
       if (!empty($value)) {
-        tealium_set_tag($key, $value);
+        tealium_set_tag($key, $value, TRUE);
       }
     }
   }
