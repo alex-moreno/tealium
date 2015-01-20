@@ -75,11 +75,15 @@ function tealium_admin() {
     '#description' => t('The Tealium JS can be attached to the header of the page or the footer.'),
   );
 
+  // We'll add an empty element at the beginning (no theme region selected).
+  $region_list = array('' => 'None') + system_region_list(tealium_get_current_theme(), REGIONS_ALL);
+
   // Javascript can be attached in the header or the footer.
   $form['javascript']['tealium_javascript_scope_theme'] = array(
-    '#type' => 'textfield',
+    '#type' => 'select',
     '#title' => t('Attachment location (theme-specific)'),
     '#default_value' => variable_get('tealium_javascript_scope_theme', ''),
+    '#options' => $region_list,
     '#description' => t(
       'The Tealium JS can be attached to a theme region. If you set this, it will <strong>override</strong> the header/footer attachment above.'
     ),
@@ -147,4 +151,25 @@ function tealium_admin_submit($form, &$form_state) {
       'warning'
     );
   }
+}
+
+
+/**
+ * Get current theme.
+ *
+ * @return String
+ */
+function tealium_get_current_theme() {
+  global $custom_theme, $theme, $user;
+
+  if (!empty($user->theme)) {
+    $current_theme = $user->theme;
+  }
+  elseif (!empty($custom_theme)) {
+    $current_theme = $custom_theme;
+  }
+  else {
+    $current_theme = $theme ? $theme : variable_get('theme_default', 'garland');
+  }
+  return $current_theme;
 }
