@@ -567,7 +567,7 @@ function tealium_form_node_form_alter(&$form, &$form_state, $form_id) {
  */
 function tealium_node_form_validate($form, $form_state) {
   // Check that the input conforms to the format we expect.
-  if (isset($form_state['values']['tealium_tags'])) {
+  if (!empty($form_state['values']['tealium_tags'])) {
     $lines = explode("\r\n", $form_state['values']['tealium_tags']);
 
     foreach ($lines as $line) {
