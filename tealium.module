@@ -45,7 +45,7 @@ function tealium_menu() {
  */
 function tealium_set_tag($key, $value, $overwrite = FALSE) {
   // Tidy up the tag_key.
-  $key = filter_xss(trim($key));
+  $value = strip_tags(trim($value));
   if (empty($key)) {
     watchdog(
       'tealium',
