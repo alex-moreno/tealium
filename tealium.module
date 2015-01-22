@@ -84,7 +84,9 @@ function tealium_set_tag($key, $value, $overwrite = FALSE) {
   $manager = TealiumTagManager::getInstance();
 
   foreach ($value as $v) {
-    $manager->add($key, $v, $overwrite);
+    if (!empty($v)) {
+      $manager->add($key, $v, $overwrite);
+    }
   }
 }
 
@@ -699,7 +701,7 @@ function _tealium_tags_to_array($input) {
  * Implements hook_node_view().
  */
 function tealium_node_view($node, $view_mode) {
-  // If per-node tagging is disabled or not sconfigured for this type, return.
+  // If per-node tagging is disabled or not configured for this type, return.
   if (!variable_get('tealium_user_tags', TRUE) || !tealium_supported_type($node->type)) {
     return;
   }
