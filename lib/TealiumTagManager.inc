@@ -4,7 +4,7 @@
  * Tealium Tag Manager stores Tealium Tags.
  */
 
-  final class TealiumTagManager {
+final class TealiumTagManager {
   /**
    * @var array
    *   array of (key => array(value,value)) pairs
