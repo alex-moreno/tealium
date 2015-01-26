@@ -8,15 +8,15 @@ Tealium uses hook_tealium_tags to communicate the new tags we want to add to a
 new page. Let’s say for example we are working in a module, called my_module.
 In my_module.module we’ll have a function like that:
 
-{% highlight php %}
+```
 function my_module_tealium_tags() {
   return $tags;
 }
-{% endhighlight %}
+```
 
 Where tags will be an array with the tags that we want to populate.
 For example:
 
-{% highlight php %}
+```
   $tags['pageTemplate'] = 'My Template';
-{% endhighlight %}
+```
