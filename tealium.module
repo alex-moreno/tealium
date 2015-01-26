@@ -35,7 +35,7 @@ function tealium_menu() {
  *
  * @param string $key
  *   Tealium tag key. e.g.: s.events
- * @param mixed $value
+ * @param mixed $values
  *   String, JSON-encoded string, or array of strings.
  * @param bool $overwrite
  *   If TRUE, overwrite existing values with new values.
@@ -43,9 +43,9 @@ function tealium_menu() {
  * @throws Exception
  *   If $key is not set.
  */
-function tealium_set_tag($key, $value, $overwrite = FALSE) {
+function tealium_set_tag($key, $values, $overwrite = FALSE) {
   // Tidy up the tag_key.
-  $value = strip_tags(trim($value));
+  $values = strip_tags(trim($values));
   if (empty($key)) {
     watchdog(
       'tealium',
@@ -58,33 +58,35 @@ function tealium_set_tag($key, $value, $overwrite = FALSE) {
 
   // If the string is JSON, decode it.
   // (This is for modules that set JSON-encoded strings on panels).
-  if (is_string($value)) {
-    $decoded_value = json_decode($value);
+  if (is_string($values)) {
+    $decoded_value = json_decode($values);
     if (json_last_error() == JSON_ERROR_NONE) {
-      $value = $decoded_value;
+      $values = $decoded_value;
     }
   }
 
   // Tidy up the tag value.
-  if (!is_array($value)) {
-    $value = array($value);
+  if (!is_array($values)) {
+    $values = array($values);
   }
-  $value = array_map('trim', $value);
+  $values = array_map('trim', $values);
 
   // Only filter values that are not in the list.
   // For security reasons, do not add tags that could be modified by a user's
   // input in that list.
   $no_filter_xss_array = variable_get('tealium_no_filter_xss_list', array());
   if (!in_array($key, $no_filter_xss_array)) {
-    $value = array_map('filter_xss', $value);
+    $values = array_map('filter_xss', $values);
   }
 
 
   // Save tag(s) to Singleton, so we can pick them up in the theme layer.
   $manager = TealiumTagManager::getInstance();
 
-  foreach ($value as $v) {
-    $manager->add($key, $v, $overwrite);
+  foreach ($values as $value) {
+    if (!empty($value)) {
+      $manager->add($key, $values, $overwrite);
+    }
   }
 }
 
@@ -699,7 +701,7 @@ function _tealium_tags_to_array($input) {
  * Implements hook_node_view().
  */
 function tealium_node_view($node, $view_mode) {
-  // If per-node tagging is disabled or not sconfigured for this type, return.
+  // If per-node tagging is disabled or not configured for this type, return.
   if (!variable_get('tealium_user_tags', TRUE) || !tealium_supported_type($node->type)) {
     return;
   }
