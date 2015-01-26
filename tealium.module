@@ -85,7 +85,7 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
 
   foreach ($values as $value) {
     if (!empty($value)) {
-      $manager->add($key, $values, $overwrite);
+      $manager->add($key, $value, $overwrite);
     }
   }
 }
