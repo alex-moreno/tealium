@@ -548,7 +548,6 @@ function tealium_form_node_form_alter(&$form, &$form_state, $form_id) {
     $form['tealium'] = array(
       '#type' => 'fieldset',
       '#title' => t('Tealium tags'),
-      '#description' => t('Tealium tags can be added or removed for this node.  Tags should be name/value pairs and on their own line.'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#weight' => 10,
@@ -557,7 +556,8 @@ function tealium_form_node_form_alter(&$form, &$form_state, $form_id) {
 
     $form['tealium']['tealium_tags'] = array(
       '#type' => 'textarea',
-      '#title' => t('Tealium Tags (this node only)'),
+      '#title' => t('Override Tealium Tags for this node'),
+      '#description' => t('Add new Tealium Tags to this node. Format is: <name>:<value>, with multiple entries separated by new lines.'),
       '#default_value' => $tags,
       '#required' => FALSE,
     );
