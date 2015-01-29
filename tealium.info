@@ -6,4 +6,4 @@ core = "7.x"
 files[] = lib/TealiumTagManager.inc
 files[] = lib/classes/exceptions/TealiumException.php
 
-dependencies[] = tokens
+dependencies[] = token
