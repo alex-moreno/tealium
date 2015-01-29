@@ -696,7 +696,6 @@ function _tealium_tags_to_array($input) {
     list($key, $value) = explode('=', $tag);
     $tags[trim($key)] = trim($value);
   }
-  $filter = array_filter($tags);
   return array_filter($tags);
 }
 
