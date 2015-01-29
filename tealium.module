@@ -85,7 +85,9 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
 
   foreach ($values as $value) {
     if (!empty($value)) {
-      $manager->add($key, $value, $overwrite);
+      // Substitute the token in case we have any in the current value.
+      $tokenized_value = token_replace($value);
+      $manager->add($key, $tokenized_value, $overwrite);
     }
   }
 }
@@ -691,9 +693,10 @@ function _tealium_tags_to_array($input) {
   $input_tags = explode("\r\n", $input);
   $tags = array();
   foreach ($input_tags as $tag) {
-    list($key, $value) = explode(':', $tag);
+    list($key, $value) = explode('=', $tag);
     $tags[trim($key)] = trim($value);
   }
+  $filter = array_filter($tags);
   return array_filter($tags);
 }
 
