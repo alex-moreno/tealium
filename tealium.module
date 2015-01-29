@@ -559,7 +559,7 @@ function tealium_form_node_form_alter(&$form, &$form_state, $form_id) {
     $form['tealium']['tealium_tags'] = array(
       '#type' => 'textarea',
       '#title' => t('Override Tealium Tags for this node'),
-      '#description' => t('Add new Tealium Tags to this node. Format is: <name>:<value>, with multiple entries separated by new lines.'),
+      '#description' => t('Add new Tealium Tags to this node. Format is: [name]=[value], with multiple entries separated by new lines.'),
       '#default_value' => $tags,
       '#required' => FALSE,
     );
