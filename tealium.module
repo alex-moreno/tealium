@@ -85,7 +85,9 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
 
   foreach ($values as $value) {
     if (!empty($value)) {
-      $manager->add($key, $value, $overwrite);
+      // Substitute the token in case we have any in the current value.
+      $tokenized_value = token_replace($value);
+      $manager->add($key, $tokenized_value, $overwrite);
     }
   }
 }
@@ -557,7 +559,7 @@ function tealium_form_node_form_alter(&$form, &$form_state, $form_id) {
     $form['tealium']['tealium_tags'] = array(
       '#type' => 'textarea',
       '#title' => t('Override Tealium Tags for this node'),
-      '#description' => t('Add new Tealium Tags to this node. Format is: <name>:<value>, with multiple entries separated by new lines.'),
+      '#description' => t('Add new Tealium Tags to this node. Format is: [name]=[value], with multiple entries separated by new lines.'),
       '#default_value' => $tags,
       '#required' => FALSE,
     );
@@ -691,7 +693,7 @@ function _tealium_tags_to_array($input) {
   $input_tags = explode("\r\n", $input);
   $tags = array();
   foreach ($input_tags as $tag) {
-    list($key, $value) = explode(':', $tag);
+    list($key, $value) = explode('=', $tag);
     $tags[trim($key)] = trim($value);
   }
   return array_filter($tags);
