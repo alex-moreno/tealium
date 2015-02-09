@@ -84,8 +84,6 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
   $manager = TealiumTagManager::getInstance();
 
   foreach ($values as $value) {
-    // 0 != NULL (0 must be accepted as a possible key).
-    // @todo: candidate to unit testing.
     if (tealium_is_valid_value($value)) {
       // Substitute the token in case we have any in the current value.
       $tokenized_value = token_replace($value);
@@ -96,6 +94,7 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
 
 /**
  * Return if its a valid value.
+ * @todo: candidate to unit testing.
  *
  * @param string $value
  *   Value to test if it's a valid one.
@@ -105,6 +104,7 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
  */
 function tealium_is_valid_value($value) {
   $valid = FALSE;
+  // 0 must be accepted as a possible key.
   if (!empty($value) || (empty($value) && (int) $value === 0)) {
     $valid = TRUE;
   }
