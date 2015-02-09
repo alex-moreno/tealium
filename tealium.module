@@ -85,7 +85,8 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
 
   foreach ($values as $value) {
     // 0 != NULL (0 must be accepted as a possible key).
-    if (!is_null($value) || !empty($value)) {
+    // @todo: candidate to unit testing.
+    if (tealium_is_valid_value($value)) {
       // Substitute the token in case we have any in the current value.
       $tokenized_value = token_replace($value);
       $manager->add($key, $tokenized_value, $overwrite);
@@ -93,6 +94,19 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
   }
 }
 
+/**
+ * Return if its a valid value.
+ *
+ * @return bool
+ *   TRUE if it's a valid value, FALSE otherwise.
+ */
+function tealium_is_valid_value($value) {
+  $valid = FALSE;
+  if (!empty($value) || (empty($value) && (int) $value === 0)) {
+    $valid = TRUE;
+  }
+  return $valid;
+}
 /**
  * Save Tealium tags in key/array store with Request scope.
  *
