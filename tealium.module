@@ -97,6 +97,9 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
 /**
  * Return if its a valid value.
  *
+ * @param string $value
+ *   Value to test if it's a valid one.
+ *
  * @return bool
  *   TRUE if it's a valid value, FALSE otherwise.
  */
@@ -107,6 +110,7 @@ function tealium_is_valid_value($value) {
   }
   return $valid;
 }
+
 /**
  * Save Tealium tags in key/array store with Request scope.
  *
