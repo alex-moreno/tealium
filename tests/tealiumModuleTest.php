@@ -57,10 +57,16 @@ class TeaiumModuleTest extends \PHPUnit_Framework_TestCase {
    */
   function getInvalidTealiumValues() {
     return array(
-      array(NULL),
+      // No empty string
       array(''),
+
+      // No int or string
+      array(NULL),
       array(FALSE),
       array(TRUE),
+      array(array()),
+      array(array('foo' => 'bar')),
+      array(new \stdClass()),
     );
   }
 }
