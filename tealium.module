@@ -84,7 +84,8 @@ function tealium_set_tag($key, $values, $overwrite = FALSE) {
   $manager = TealiumTagManager::getInstance();
 
   foreach ($values as $value) {
-    if (!empty($value)) {
+
+    if (tealium_is_valid_value($value)) {
       // Substitute the token in case we have any in the current value.
       $tokenized_value = token_replace($value);
       $manager->add($key, $tokenized_value, $overwrite);

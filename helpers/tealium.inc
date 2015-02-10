@@ -52,3 +52,20 @@ function _tealium_is_json($string) {
   json_decode($string);
   return (json_last_error() == JSON_ERROR_NONE);
 }
+
+/**
+ * Return if its a valid tealium value for a tag.
+ * @todo: Move this into the Tealium Object during the refactoring.
+ *
+ * It should just accept non empty strings or integers.
+ *
+ * @param string $value
+ *   Value to test if it's a valid one.
+ *
+ * @return bool
+ *   TRUE if it's a valid value, FALSE otherwise.
+ */
+function tealium_is_valid_value($value) {
+  // @see TeaiumModuleTest for valid values.
+  return $value !== '' && (is_int($value) || is_string($value));
+}
