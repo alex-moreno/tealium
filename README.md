@@ -20,3 +20,20 @@ For example:
 ```
   $tags['pageTemplate'] = 'My Template';
 ```
+
+##TROUBLESHOOTING
+- Wrong encoding for some variables:
+In case you need to add a tag with special encodings, like 'test & test', the
+& will be transformed in something like 'test &amp; test'.
+
+To avoid this simply add the tag you need with special coding to, ie:
+
+```
+function mymodule_update_7001() {
+  $non_filtered = array('pageName', 'pageTemplate');
+
+  variable_set('tealium_no_filter_xss_list', $non_filtered);
+}
+```
+
+So from now, you pageTemplate tag will accept special coded characters.
